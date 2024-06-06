@@ -46,8 +46,8 @@ thus only binding uppercase letters here
 
 - cant be bound: `~ $ % & * { } | "`
 
-
 ## other things
+
 Since this has a high likelyhood of
 
 one of three things will happen
