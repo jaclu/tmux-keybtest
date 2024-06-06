@@ -1,11 +1,19 @@
-# tmux-check-terminal
+# tmux-keybtest
 
-Check what keys tmux can detect from your terminal
-
-If your terminal binds some keys, they will not be detected by tmux!
+Check what keys tmux can detect from your terminal.
 
 When a key is pressed and it was identified, its name is displayed on the
-status line
+status line.
+
+Terminals often have some issues, for some keys they might generate the
+wrong thing, or even nothing.
+
+If your terminal binds some keys, they will not be detected by tmux,
+sometims you can disable your terminals usage of a key that you would
+prefer to send to tmux.
+
+ I have only defined US-keyb keys, contributions for other keys
+ would be apreciated!
 
 ## Keys not tested
 
@@ -17,12 +25,12 @@ use `A`
 ### Control C-
 
 - cant be bound: `~ $ % & * { } | "`
-- case is ignored, binding `C-A` after `C-a` will drop the `C-a` bind
+- case is ignored, binding `C-A` after `C-a` will drop the `C-a` bind,
 thus only binding uppercase here
 - Skipped to avoid collision
   - `C-I` is the same as Tab
   - `C-M` is the same as `Enter`
-  - `C-X` is not tested, that would make it impossible to exit
+  - `C-X` is not tested, it is tmux prefix
   - `C-[` is the same as Escape
 
 ### Control Shift C-S-
@@ -36,7 +44,7 @@ thus only binding uppercase here
 ### Control Meta  C-M-
 
 - cant be bound: `~ $ % & * { } | "`
-- case is ignored, binding `C-M-A` after `C-M-a` will drop the `C-M-a` bind
+- case is ignored, binding `C-M-A` after `C-M-a` will drop the `C-M-a` bind,
 thus only binding uppercase letters here
 - Skipped to avoid collision
   - `C-M-M` is the same as `M-Enter`
@@ -45,6 +53,7 @@ thus only binding uppercase letters here
 ### Control Meta Shift  C-M-S-
 
 - cant be bound: `~ $ % & * { } | "`
+- Since this is using shift, no lower case keys are bound here
 
 ## other things
 
@@ -56,13 +65,10 @@ one of three things will happen
 - If the key sent output not recognized it will be displayed in the
 This will display what key was pressed
 
- I have only defined US-keyb keys, contributions for other keys
- would be apreciated!
+## What does your terminal generate for a given key
 
-## What does your terminal generate
-
- To check what keys your terminal generates, here are some
- suggestions, should be run outside tmux, since it might capture keys
+ To check what sequence a key generates by your terminal, here are some
+ suggestions, should be run outside tmux, since it might capture keys.
 
 - showkeys -a
 - xxd
@@ -80,9 +86,13 @@ This will display what key was pressed
 
 ## If terminal cant be made to send correct sequence
 
- If you cant alter what your terminal generates, but it does generate
- something, you can bind that to the desired key by using user-keys.
+ If you cant alter what your terminal generates, but a key does generate
+ something unique, you can bind that to the desired key or other event
+ by using user-keys. It is somewhat confusing, but when you define a user-key
+ you use an index, but when you bind it, you use the index as a suffix
+ to the key name, see below.
 
+ Tmux is picky about notation for defining user-keys.
  Remember to use octals prefixed by `\\` and always give three digits,
  so if the octal is 73 give it as `\\073`
 
