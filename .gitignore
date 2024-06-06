@@ -1,0 +1,6 @@
+# temp files
+*~
+\#*
+
+# olint linter cache
+.cache.olint
