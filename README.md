@@ -98,11 +98,10 @@ If a key generates an unrecognized code, there is a high likelyhood the
 terminal will beep, so if in a public spot, mutung the sound might come
 in handy before running this.
 
-Unrecognized keys will be printed, this will certainly happen for keys
-not present on the US keyboard!
+Unrecognized keys will be printed.
 
 If time allows, please submit such output in an issue, and I will add it!
-I will only need the character/character sequence displayed,
+I will only need the character/character sequence displayed for a given key,
 ideally also what keyboard type generated it, but that is optional.
 
 ## If terminal cant be made to send the correct sequence
