@@ -84,6 +84,9 @@ so if binding `C-M-a` pressing ctrl+alt+A will trigger that action and vice-vers
 
 ## Other things
 
+In the tmux universe the keys for Insert is called `IC` and Delete is
+called `DC` so if those are spotted, the terminal is doing the right thing!
+
 If a key generates an unrecognized code, there is a high likelyhood the 
 terminal will beep, so if in a public spot, mutung the sound might come 
 in handy before running this.
