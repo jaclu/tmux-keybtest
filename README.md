@@ -13,8 +13,8 @@ sequence can be sent when pressing a key,
 this is unfortunately not always the case.
 
 The most poorly suported key seems to be PrtScr/SysRq
-So far I have not tested two terminals that interprets it the same way, 
-especially when using modifiers. Luckily I doubt many will use that key, 
+So far I have not tested two terminals that interprets it the same way,
+especially when using modifiers. Luckily I doubt many will use that key,
 so it shouldnt be much of an issue, but it is a good example how terminals
 differs.
 
