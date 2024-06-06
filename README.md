@@ -6,7 +6,9 @@ When a key is pressed and it was identified, its name is displayed on the
 status line.
 
 Terminals often have some issues, for some keys they might generate the
-wrong thing, or even nothing.
+wrong thing, or even nothing. Using this it can help you to select the
+right terminal, or if you already have decided it can show you what keys
+are available to use.
 
 If your terminal binds some keys, they will not be detected by tmux,
 sometims you can disable your terminals usage of a key that you would
