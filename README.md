@@ -16,14 +16,13 @@ use `A`
 
 ### Control C-
 
-Regular keys
-
-- cant be bound: `$ % & * { } | "`
-- `x` and `X` are not tested, that would make it impossible to exit
+- cant be bound: `~ $ % & * { } | "`
 - case is ignored, binding `C-A` after `C-a` will drop the `C-a` bind
+thus only binding uppercase here
 - Skipped to avoid collision
-  - `C-i` & `C-I` are the same as Tab
-  - `C-m` and `C-M` are the same as `Enter`
+  - `C-I` is the same as Tab
+  - `C-M` is the same as `Enter`
+  - `C-X` is not tested, that would make it impossible to exit
   - `C-[` is the same as Escape
 
 ### Control Shift C-S-
@@ -36,18 +35,19 @@ Regular keys
 
 ### Control Meta  C-M-
 
-Regular keys
-
-- cant be bound: `$ % & * { } | "`
+- cant be bound: `~ $ % & * { } | "`
 - case is ignored, binding `C-M-A` after `C-M-a` will drop the `C-M-a` bind
+thus only binding uppercase letters here
 - Skipped to avoid collision
-  - `C-M-m` and `C-M-M` are the same as `M-Enter`
+  - `C-M-M` is the same as `M-Enter`
   - `C-M-[` is the same as `M-Escape`
 
-### Control Shift Meta  C-S-M-
+### Control Meta Shift  C-M-S-
 
-- cant be bound: `$ % & * { } | "`
+- cant be bound: `~ $ % & * { } | "`
 
+
+## other things
 Since this has a high likelyhood of
 
 one of three things will happen
