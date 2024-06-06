@@ -2,28 +2,32 @@
 
 Check what keys tmux can detect from the terminal being used.
 
-When a key is pressed and it was identified, its tmux name is displayed on the
-status line, like `C-M-Up`
+When a key is pressed and it was identified, its tmux name is displayed
+on the status line, like `C-M-Up`
 
 Terminals often have some issues, for some keys they might generate the
 wrong thing, or even nothing. Using this can give help to select the
 right terminal, or if one is already selected, it can show what keys
-are available to use. Some terminals offer good suport in defining what sequence can be 
-sent when pressing a key, this is unfortunately not always the case.
+are available to use. Some terminals offer good suport in defining what
+sequence can be sent when pressing a key,
+this is unfortunately not always the case.
 
-If the Operating System or terminal binds some keys, they will not be detected by tmux. 
-Sometims it is possible to disable such usages of a key that would make more sense to
-handle by tmux.
+If the Operating System or terminal binds some keys, they will not be
+detected by tmux.
+Sometims it is possible to disable such usages of a key that would make
+more sense to handle by tmux.
 
- I have only defined US-keyb keys, contributions for other keys
- would be apreciated!
+ I have only defined the letters a-z and the Swedish umlauts,
+ contributions for other characters would be apreciated!
 
 ## Usage
 
-Clone this, then run `keybtest.sh` 
+Clone this, then run `keybtest.sh`
 
-This will start a tmux session that will display the tmux notation for any key 
-pressed that tmux could recognize.
+This will start a tmux session that will display the tmux notation for
+any key pressed that tmux could recognize. Be aware that some keys might
+not send the intended sequence, so tmux will interperate it as something
+else!
 
 The tmux key name prefixes are:
 
@@ -31,31 +35,33 @@ The tmux key name prefixes are:
 - `C-` Control was pressed together with the key
 - `M-` Alt was pressed together with the key
 
-Use the names displayed here in tmux.conf to bind that key to a desired action.
+Use the names displayed here in tmux.conf to bind that key to a desired
+action.
 
-It might be obvious, but this should not be run this inside another tmux session, 
-since that would typically bind some keys.
+It might be obvious, but this should not be run this inside another tmux
+session, since that would typically bind some keys.
 
-The exit sequence `C-x` `C-x` is displayed in the status line, so usage should be 
-self-explainatory, without any need to memorize the exit sequence.
+The exit sequence `C-x` `C-x` is displayed in the status line, so usage
+should be self-explainatory, without any need to memorize the exit sequence.
 
 ## Keys not tested
 
 ### Shift S-
 
-- The shifted regular keys are not tested, instead of binding `S-a` or `S-A`
-use `A`
+- The shifted regular keys are not tested, instead of binding `S-a` or
+`S-A` use `A`
 
 ### Control C-
 
 - cant be bound: `~ $ % & * { } | "`
 - Case is ignored, binding `C-A` after `C-a` will drop the `C-a` bind,
 thus only binding lowercase here. Case is also ignored for key presses,
-so if binding `C-a` pressing ctrl+A will trigger that action and vice-versa.
+so if binding `C-a` pressing ctrl+A will trigger that action and
+vice-versa.
 - Skipped to avoid collision
-  - `C-I` is the same as `Tab`
-  - `C-M` is the same as `Enter`
-  - `C-X` is not tested, it is tmux prefix
+  - `C-i` is the same as `Tab`
+  - `C-m` is the same as `Enter`
+  - `C-x` is not tested, it is tmux prefix
   - `C-[` is the same as `Escape`
 
 ### Control Shift C-S-
@@ -71,10 +77,11 @@ so if binding `C-a` pressing ctrl+A will trigger that action and vice-versa.
 - cant be bound: `~ $ % & * { } | "`
 - Case is ignored, binding `C-M-A` after `C-M-a` will drop the `C-M-a` bind,
 thus only binding lowercase here. Case is also ignored for key presses,
-so if binding `C-M-a` pressing ctrl+alt+A will trigger that action and vice-versa.
+so if binding `C-M-a` pressing ctrl+alt+A will trigger that action and
+vice-versa.
 
 - Skipped to avoid collision
-  - `C-M-M` is the same as `M-Enter`
+  - `C-M-m` is the same as `M-Enter`
   - `C-M-[` is the same as `M-Escape`
 
 ### Control Meta Shift  C-M-S-
@@ -87,16 +94,41 @@ so if binding `C-M-a` pressing ctrl+alt+A will trigger that action and vice-vers
 In the tmux universe the keys for Insert is called `IC` and Delete is
 called `DC` so if those are spotted, the terminal is doing the right thing!
 
-If a key generates an unrecognized code, there is a high likelyhood the 
-terminal will beep, so if in a public spot, mutung the sound might come 
+If a key generates an unrecognized code, there is a high likelyhood the
+terminal will beep, so if in a public spot, mutung the sound might come
 in handy before running this.
 
 Unrecognized keys will be printed, this will certainly happen for keys
 not present on the US keyboard!
 
-If time allows, please submit such keys in an issue, and I will add them!
-I will only need the character/character sequence displayed.
+If time allows, please submit such output in an issue, and I will add it!
+I will only need the character/character sequence displayed,
+ideally also what keyboard type generated it, but that is optional.
 
+## If terminal cant be made to send the correct sequence
+
+If what is generated is understood by tmux, but not what was intended,
+like if `S-F3` is generated by Alt+Up and `S-F3` wont be used.
+Just bind the action intended for Alt+Up to `S-F3` - problem solved!
+
+If it is not possible to alter what the terminal generates,
+but a key does generate something unique that tmux doesnt recognize,
+that sequence can be bound to the desired action by using user-keys.
+
+Tmux is picky about notation for defining user-keys.
+Remember to use octals prefixed by `\\` and always give three digits,
+so if the octal is 73 give it as `\\073`
+
+Octals are normally in the middle column when using `showkeys -a`
+
+It might be somewhat confusing, when defining a user-key an index is used,
+but when binding it, the index is used as a suffix to `User`.
+See this sample:
+
+```tmux
+set -s user-keys[101] "\\342\\201\\204"
+bind -n User101 send-keys F1
+```
 
 ## What does the terminal generate for a given key
 
@@ -105,29 +137,3 @@ I will only need the character/character sequence displayed.
 
 - showkeys -a
 - xxd
-
-## If terminal cant be made to send the correct sequence
-
-If what is generated is understood by tmux, but not what was intended, like
-if `S-F3` is generated by Alt+up-arrow and `S-F3` wont be used, 
-just bind the action intended for Alt+up arrow to `S-F3` - problem solved!
-
-If it is not possible to alter what the terminal generates, but a key does
-generate something unique, that tmux doesnt recognize, that sequence can 
-be bound to the desired key or other event by using user-keys.
-
-If the sequence is not understood 
-It might be somewhat confusing, when defining a user-key an index is used, 
-but when binding it, the index is used as a suffix to the key name. 
-see below.
-
-Tmux is picky about notation for defining user-keys.
-Remember to use octals prefixed by `\\` and always give three digits,
-so if the octal is 73 give it as `\\073`
-
-Octals are normally in the middle column when using `showkeys -a`
-
-```tmux
-set -s user-keys[101] "\\342\\201\\204"
-bind -n User101 send-keys F1
-```
