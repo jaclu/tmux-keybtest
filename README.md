@@ -12,6 +12,12 @@ are available to use. Some terminals offer good suport in defining what
 sequence can be sent when pressing a key,
 this is unfortunately not always the case.
 
+The most poorly suported key seems to be PrtScr/SysRq
+So far I have not tested two terminals that interprets it the same way, 
+especially when using modifiers. Luckily I doubt many will use that key, 
+so it shouldnt be much of an issue, but it is a good example how terminals
+differs.
+
 If the Operating System or terminal binds some keys, they will not be
 detected by tmux.
 Sometims it is possible to disable such usages of a key that would make
