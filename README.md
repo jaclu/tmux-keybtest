@@ -10,8 +10,8 @@ wrong thing, or even nothing. Using this it can help you to select the
 right terminal, or if you already have decided it can show you what keys
 are available to use.
 
-If your terminal binds some keys, they will not be detected by tmux,
-sometims you can disable your terminals usage of a key that you would
+If your Operating System or terminal binds some keys, they will not be detected by tmux,
+sometims you can disable such usages of a key that you would
 prefer to send to tmux.
 
  I have only defined US-keyb keys, contributions for other keys
