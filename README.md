@@ -89,7 +89,7 @@ This will display what key was pressed
 ## If terminal cant be made to send correct sequence
 
  If you cant alter what your terminal generates, but a key does generate
- something unique, you can bind that to the desired key or other event
+ something unique, you can bind that sequence to the desired key or other event
  by using user-keys. It is somewhat confusing, but when you define a user-key
  you use an index, but when you bind it, you use the index as a suffix
  to the key name, see below.
