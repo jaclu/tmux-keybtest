@@ -67,7 +67,6 @@ vice-versa.
 - Skipped to avoid collision
   - `C-i` is the same as `Tab`
   - `C-m` is the same as `Enter`
-  - `C-x` is not tested, it is tmux prefix
   - `C-[` is the same as `Escape`
 
 ### Control Shift C-S-
@@ -87,8 +86,9 @@ so if binding `C-M-a` pressing ctrl+alt+A will trigger that action and
 vice-versa.
 
 - Skipped to avoid collision
-  - `C-M-m` is the same as `M-Enter`
-  - `C-M-[` is the same as `M-Escape`
+  - `C-M-i` is the same as `C-M-tab`
+  - `C-M-m` is the same as `C-M-Enter`
+  - `C-M-[` is the same as `C-M-Escape`
 
 ### Control Meta Shift  C-M-S-
 
