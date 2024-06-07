@@ -12,12 +12,6 @@ are available to use. Some terminals offer good suport in defining what
 sequence can be sent when pressing a key,
 this is unfortunately not always the case.
 
-The most poorly suported key seems to be PrtScr/SysRq
-So far I have not tested two terminals that interprets it the same way,
-especially when using modifiers. Luckily I doubt many will use that key,
-so it shouldnt be much of an issue, but it is a good example how terminals
-differs.
-
 If the Operating System or terminal binds some keys, they will not be
 detected by tmux.
 Sometims it is possible to disable such usages of a key that would make
@@ -41,8 +35,8 @@ The tmux key name prefixes are:
 - `C-` Control was pressed together with the key
 - `M-` Alt was pressed together with the key
 
-Use the names displayed here in tmux.conf to bind that key to a desired
-action.
+Use the names displayed here in your tmux.conf to bind that key to a desired
+action matching the current terminals capabilities.
 
 It might be obvious, but this should not be run this inside another tmux
 session, since that would typically bind some keys.
@@ -97,7 +91,7 @@ vice-versa.
 
 ## Other things
 
-In the tmux universe the keys for Insert is called `IC` and Delete is
+In the tmux universe the key for Insert is called `IC` and Delete is
 called `DC` so if those are spotted, the terminal is doing the right thing!
 
 If a key generates an unrecognized code, there is a high likelyhood the
