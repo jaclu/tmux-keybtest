@@ -94,8 +94,8 @@ vice-versa.
 In the tmux universe the key for Insert is called `IC` and Delete is
 called `DC` so if those are spotted, the terminal is doing the right thing!
 
-If a key generates an unrecognized code, there is a high likelyhood the
-terminal will beep, so if in a public spot, mutung the sound might come
+If a key generates an unrecognized code, there is a high likelyhood that the
+terminal will beep, so if in a public spot, muting the sound might come
 in handy before running this.
 
 Unrecognized keys will be printed.
