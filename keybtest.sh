@@ -1,6 +1,6 @@
 #!/bin/sh
 
-D_TKT_BASE_PATH="$(realpath -- "$(dirname -- "$0")")"
+D_TKT_BASE_PATH="$(realpath "$(dirname -- "$0")")"
 
 #
 # use pid of this script to make socket unique. This allows more than one
