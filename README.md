@@ -1,138 +1,113 @@
 # tmux-keybtest
 
-Check what keys tmux can detect from the terminal being used.
+**tmux-keybtest** is a utility for identifying which key sequences tmux can
+detect in your terminal. When you press a key, its tmux name, like `C-M-Up`,
+will be displayed on the status line if recognized.
 
-When a key is pressed and it was identified, its tmux name is displayed
-on the status line, like `C-M-Up`
+Terminals can sometimes misinterpret key presses, generating the wrong sequence
+or nothing at all. **tmux-keybtest** helps you evaluate which keys are
+available in your current terminal and can assist in selecting a terminal with
+better support for key sequences.
 
-Terminals often have some issues, for some keys they might generate the
-wrong thing, or even nothing. Using this can give help to select the
-right terminal, or if one is already selected, it can show what keys
-are available to use. Some terminals offer good suport in defining what
-sequence can be sent when pressing a key,
-this is unfortunately not always the case.
+Note: If your operating system or terminal has already bound certain keys,
+tmux may not detect them. It may be possible to reconfigure your system or
+terminal to free up these keys for tmux use.
 
-If the Operating System or terminal binds some keys, they will not be
-detected by tmux.
-Sometims it is possible to disable such usages of a key that would make
-more sense to handle by tmux.
-
- I have only defined the letters a-z and the Swedish umlauts,
- contributions for other characters would be apreciated!
+Currently, only the letters `a-z` and Swedish umlauts are defined.
+Contributions for other characters are appreciated!
 
 ## Usage
 
-Clone this, then run `keybtest.sh`
+1. Clone this repository and navigate to its directory.
+2. Run `keybtest.sh` to start a tmux session that will display the tmux
+notation for any recognized key press.
 
-This will start a tmux session that will display the tmux notation for
-any key pressed that tmux could recognize. Be aware that some keys might
-not send the intended sequence, so tmux will interperate it as something
-else!
+### Important Notes
 
-The tmux key name prefixes are:
+- Some keys might not send the intended sequence, causing tmux to interpret
+them differently.
+- Avoid running this script inside an existing tmux session, as this may
+interfere with key detection.
+- To exit the session, press `C-x` `C-x`. The exit sequence is displayed in
+the status line for convenience.
 
-- `S-` Shift was pressed together with the key
-- `C-` Control was pressed together with the key
-- `M-` Alt was pressed together with the key
+### tmux Key Name Prefixes
 
-Use the names displayed here in your tmux.conf to bind that key to a desired
-action matching the current terminals capabilities.
+- `S-` : Shift key is pressed.
+- `C-` : Control key is pressed.
+- `M-` : Alt (Meta) key is pressed.
 
-It might be obvious, but this should not be run this inside another tmux
-session, since that would typically bind some keys.
+Use the key names displayed to customize your `tmux.conf` according to your
+terminal's capabilities.
 
-The exit sequence `C-x` `C-x` is displayed in the status line, so usage
-should be self-explainatory, without any need to memorize the exit sequence.
+## Keys Not Tested
 
-## Keys not tested
+### Shift `S-`
 
-### Shift S-
+- Shifted regular keys are not tested. Instead of binding `S-a` or `S-A`,
+use `A`.
 
-- The shifted regular keys are not tested, instead of binding `S-a` or
-`S-A` use `A`
+### Control `C-`
 
-### Control C-
-
-- cant be bound: `~ $ % & * { } | "`
-- Case is ignored, binding `C-A` after `C-a` will drop the `C-a` bind,
-thus only binding lowercase here. Case is also ignored for key presses,
-so if binding `C-a` pressing ctrl+A will trigger that action and
-vice-versa.
-- Skipped to avoid collision
+- Cannot be bound: `~ $ % & * { } | "`
+- Case is ignored: Binding `C-A` after `C-a` will override `C-a`, so only
+lowercase is bound.
+- Keys skipped due to collision:
   - `C-i` is the same as `Tab`
   - `C-m` is the same as `Enter`
   - `C-[` is the same as `Escape`
 
-### Control Shift C-S-
+### Control Shift `C-S-`
 
-- Regular keys Not tested, same as with `S-`
+- Regular keys not tested, same as with `S-`.
 
-### Meta Shift  M-S-
+### Meta Shift `M-S-`
 
-- Regular keys Not tested, same as with `S-`
+- Regular keys not tested, same as with `S-`.
 
-### Control Meta  C-M-
+### Control Meta `C-M-`
 
-- cant be bound: `~ $ % & * { } | "`
-- Case is ignored, binding `C-M-A` after `C-M-a` will drop the `C-M-a` bind,
-thus only binding lowercase here. Case is also ignored for key presses,
-so if binding `C-M-a` pressing ctrl+alt+A will trigger that action and
-vice-versa.
-
-- Skipped to avoid collision
+- Cannot be bound: `~ $ % & * { } | "`
+- Case is ignored: Binding `C-M-A` after `C-M-a` will override `C-M-a`, so
+only lowercase is bound.
+- Keys skipped due to collision:
   - `C-M-i` is the same as `C-M-tab`
   - `C-M-m` is the same as `C-M-Enter`
   - `C-M-[` is the same as `C-M-Escape`
 
-### Control Meta Shift  C-M-S-
+### Control Meta Shift `C-M-S-`
 
-- cant be bound: `~ $ % & * { } | "`
-- Since this is using shift, no lower case keys are bound here
+- Cannot be bound: `~ $ % & * { } | "`
+- No lowercase keys are bound due to the use of Shift.
 
-## Other things
+## Additional Information
 
-In the tmux universe the key for Insert is called `IC` and Delete is
-called `DC` so if those are spotted, the terminal is doing the right thing!
+- **Insert** is referred to as `IC` and **Delete** as `DC` in tmux. If you see
+these, the terminal is functioning correctly.
+- If a key generates an unrecognized code, the terminal might beep. Consider
+muting your sound before running this in public spaces.
+- Unrecognized keys will be printed. Please submit such outputs as an issue,
+including the key/sequence and, if possible, your keyboard type.
 
-If a key generates an unrecognized code, there is a high likelyhood that the
-terminal will beep, so if in a public spot, muting the sound might come
-in handy before running this.
+## Handling Terminals That Can't Send Correct Sequences
 
-Unrecognized keys will be printed.
+If a terminal generates a sequence that tmux recognizes but is not the
+intended one (e.g., `Alt+Up` generates `S-F3`), bind the desired action to the
+detected sequence (`S-F3`).
 
-If time allows, please submit such output in an issue, and I will add it!
-I will only need the character/character sequence displayed for a given key,
-ideally also what keyboard type generated it, but that is optional.
+If a terminal generates an unrecognized but unique sequence, you can bind it
+to an action using user-keys. Tmux requires octal notation for user-keys,
+formatted as three digits and prefixed with `\\`.
 
-## If terminal cant be made to send the correct sequence
+Example:
 
-If what is generated is understood by tmux, but not what was intended,
-like if `S-F3` is generated by Alt+Up and `S-F3` wont be used.
-Just bind the action intended for Alt+Up to `S-F3` - problem solved!
+    set -s user-keys[101] "\\342\\201\\204"
+    bind -n User101 send-keys F1
 
-If it is not possible to alter what the terminal generates,
-but a key does generate something unique that tmux doesnt recognize,
-that sequence can be bound to the desired action by using user-keys.
+## Checking Terminal Key Sequences
 
-Tmux is picky about notation for defining user-keys.
-Remember to use octals prefixed by `\\` and always give three digits,
-so if the octal is 73 give it as `\\073`
+To determine what sequence a key generates, use the following commands outside
+of tmux:
 
-Octals are normally in the middle column when using `showkeys -a`
-
-It might be somewhat confusing, when defining a user-key an index is used,
-but when binding it, the index is used as a suffix to `User`.
-See this sample:
-
-```tmux
-set -s user-keys[101] "\\342\\201\\204"
-bind -n User101 send-keys F1
-```
-
-## What does the terminal generate for a given key
-
- To check what sequence a key generates by the terminal, here are some
- suggestions, should be run outside tmux, since it might capture keys.
-
-- showkeys -a
-- xxd
+- `showkeys -a`
+- `xxd`
