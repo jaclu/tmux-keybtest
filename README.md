@@ -13,8 +13,13 @@ Note: If your operating system or terminal has already bound certain keys,
 tmux may not detect them. It may be possible to reconfigure your system or
 terminal to free up these keys for tmux use.
 
-Currently, only the letters `a-z` and Swedish umlauts are defined.
-Contributions for other characters are appreciated!
+Currently, support is provided for basic alphabetic characters (`a-z`) and
+Swedish umlauts (`ä`, `ö`, `å`). If your keyboard includes other
+language-specific characters or special symbols that aren't recognized,
+please let me know, and I'll be happy to add support for them.
+
+All other keys found on a standard US keyboard, such as punctuation marks and
+symbols, are already handled and do not require additional definitions.
 
 ## Usage
 
