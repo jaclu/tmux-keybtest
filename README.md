@@ -14,7 +14,7 @@ tmux may not detect them. It may be possible to reconfigure your system or
 terminal to free up these keys for tmux use.
 
 Currently, support is provided for basic alphabetic characters (`a-z`) and
-Swedish umlauts (`ä`, `ö`, `å`). If your keyboard includes other
+Swedish umlauts (`å`, `ä`, `ö`). If your keyboard includes other
 language-specific characters or special symbols that aren't recognized,
 please let me know, and I'll be happy to add support for them.
 
