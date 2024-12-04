@@ -3,7 +3,7 @@
 #
 # Displays mouse event after 1 second, replacing mount event to be displayed
 # with the one from the latest call of this.
-# This is needed since some evenets like double & tripple click generates
+# This is needed since some evenets like double & triple click generates
 # multiple events
 #
 
