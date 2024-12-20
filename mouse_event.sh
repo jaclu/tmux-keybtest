@@ -9,13 +9,16 @@
 
 d_tkbtst_location="$(realpath "$(dirname -- "$0")")"
 
+# shellcheck source=/dev/null
 . "$d_tkbtst_location"/utils.sh
 
 #tmux display-message -p "$1"
 #cleanup_tmp_files
 #exit 0
 
+# shellcheck disable=SC2154
 echo "$1" >"$f_mouse_status"
+# shellcheck disable=SC2154
 [ -f "$f_mouse_display_timer" ] && exit 0
 touch "$f_mouse_display_timer"
 
