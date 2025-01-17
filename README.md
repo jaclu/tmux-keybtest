@@ -94,20 +94,33 @@ muting your sound before running this in public spaces.
 - Unrecognized keys will be printed. Please submit such outputs as an issue,
 including the key/sequence and, if possible, your keyboard type.
 
-## Handling Terminals That Can't Send Correct Sequences
+## When Terminal Generates the wrong key
 
 If a terminal generates a sequence that tmux recognizes but is not the
 intended one (e.g., `Alt+Up` generates `S-F3`), bind the desired action to the
 detected sequence (`S-F3`).
 
+## When tmux doesn't recognize what the key sends
+
 If a terminal generates an unrecognized but unique sequence, you can bind it
 to an action using user-keys. Tmux requires octal notation for user-keys,
-formatted as three digits and prefixed with `\\`.
+formatted as three digit values (0 padded) and prefixed with `\\`.
+
+`showkey -a` can be used to find the octals, examine the middle column.
 
 Example:
 
     set -s user-keys[101] "\\342\\201\\204"
     bind -n User101 send-keys F1
+
+Be aware that the send-keys `F1` in this case is sent to the app running in
+the Pane. You can't use this `F1` when binding to an action. For that
+use `User101`
+
+This is probably amongst the least intuitive features in tmux
+
+- assign a key using `user-key[100]`
+- when binding it to something, use `User100`
 
 ## Checking Terminal Key Sequences
 
