@@ -1,4 +1,10 @@
 #!/bin/sh
+#
+#   Copyright (c) 2024-2025: Jacob.Lundqvist@gmail.com
+#   License: MIT
+#
+#   Part of https://github.com/jaclu/tmux-keybtest
+#
 
 #
 # Displays mouse event after 1 second, replacing mount event to be displayed
@@ -7,7 +13,7 @@
 # multiple events
 #
 
-d_tkbtst_location="$(realpath "$(dirname -- "$0")")"
+d_tkbtst_location="$(dirname "$(realpath "$0")")"
 
 # shellcheck source=/dev/null
 . "$d_tkbtst_location"/utils.sh
@@ -25,4 +31,3 @@ touch "$f_mouse_display_timer"
 sleep 0.8
 tmux display-message -p "$(cat "$f_mouse_status")"
 cleanup_tmp_files
-

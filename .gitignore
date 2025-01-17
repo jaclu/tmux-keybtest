@@ -4,3 +4,9 @@
 
 # olint linter cache
 .cache.olint
+
+# Used for tmux.conf testing
+keybtest.conf
+
+# local tool version overrides
+.tool-versions
