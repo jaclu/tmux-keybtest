@@ -52,119 +52,103 @@ bind_char() {
 }
 
 base_conf() {
-    #region
-    echo "
-#===========================================================
-#
-#  Tmux conf for teting keyboard implementation, and what
-#  non standard sequences it can generate. - Arrows with modifiers etc
-#
-#===========================================================
-
-# tmux version: $tmux_vers
-
-#
-#  Minimal config
-#
-set-option -g prefix C-x
-
-bind C-c kill-server
-
-set-option -s escape-time 0
-set-option -g display-time 1000
-set-option -g visual-bell on
-
-set -g focus-events on" >>"$tmux_conf"
-
+    writeln "#==========================================================="
+    writeln "#"
+    writeln "#  Tmux conf for teting keyboard implementation, and what"
+    writeln "#  non standard sequences it can generate. - Arrows with modifiers etc"
+    writeln "#"
+    writeln "#==========================================================="
+    writeln ""
+    writeln "# Created for tmux version: $tmux_vers"
+    writeln ""
+    writeln "#"
+    writeln "#  Minimal config"
+    writeln "#"
+    writeln "set-option -g prefix C-x"
+    writeln "bind C-c kill-server"
+    writeln "set-option -g mouse on"
+    writeln "set-option -s escape-time 100"
+    writeln "set-option -g display-time 1000"
+    writeln "set-option -g visual-bell on"
+    writeln "set -g focus-events on"
     tmux_vers_compare 3.2 && writeln "set -g extended-keys on"
-    tmux_vers_compare 2.8 && writeln 'bind Any display -- "-----   Not defined   -----"'
+    # tmux_vers_compare 2.8 && writeln 'bind Any display "Not defined"'
     tmux_vers_compare 2.9 && {
-        echo " #
-#  Display some hints in status bar left row 2 & 3
-#
-set-option -g status 3
-set-option -g status-format[1] 'Displays keys and mouse events recognized by tmux in status-bar'
-set-option -g status-format[2] 'To exit press C-x then C-c. To test C-x press it twice'
-" >>"$tmux_conf"
+        writeln
+        writeln "#"
+        writeln "#  Display some hints in status bar left row 2 & 3"
+        writeln "#"
+        writeln "set-option -g status 3"
+        writeln "set-option -g status-format[1] 'Displays keys and mouse events recognized by tmux in status-bar'"
+        writeln "set-option -g status-format[2] 'To exit press C-x then C-c. To test C-x press it twice'"
     }
 
-    echo "
-#
-# Display prefix key pressed in Status bar right
-#
-set-option -g status-right-length 0
-set-option -g status-right '#{?client_prefix,Prefix #[fg=colour231]#[bg=colour04]C-x#[default] - Press C-c to exit,}'
-
-run-shell -b 'sleep 0.5 ; tmux send-keys \"showkey -a\" C-M'
-
-set-option -g mouse on
-" >>"$tmux_conf"
-    #endregion
+    writeln
+    writeln "#"
+    writeln "# Display prefix key pressed in Status bar right"
+    writeln "#"
+    writeln "set-option -g status-right-length 0"
+    writeln "set-option -g status-right '#{?client_prefix,Prefix #[fg=colour231]#[bg=colour04]C-x#[default] - Press C-c to exit,}'"
+    writeln "run-shell -b 'sleep 0.5 ; tmux send-keys \"showkey -a\" C-M'"
 }
 
 mouse_event_via_script() {
     # Doesn't work right now, using mouse_events() instead
 
-    #region
-    echo "
-    #
-    #  Mouse
-    #
-    bind -n '${mod}WheelUpPane' run-shell -b '\$f_mouse_event ${mod}WheelUpPane'
-    bind -n '${mod}WheelDownPane' run-shell -b '\$f_mouse_event ${mod}WheelDownPane'
-    bind -n '${mod}MouseDown1Pane' run-shell -b '\$f_mouse_event ${mod}MouseDown1Pane'
-    bind -n '${mod}MouseUp1Pane' run-shell -b '\$f_mouse_event ${mod}MouseUp1Pane'
-    bind -n '${mod}MouseDrag1Pane' run-shell -b '\$f_mouse_event ${mod}MouseDrag1Pane'
-    bind -n '${mod}MouseDragEnd1Pane' run-shell -b '\$f_mouse_event ${mod}MouseDragEnd1Pane'
-    bind -n '${mod}MouseDown2Pane' run-shell -b '\$f_mouse_event ${mod}MouseDown2Pane'
-    bind -n '${mod}MouseUp2Pane' run-shell -b '\$f_mouse_event ${mod}MouseUp2Pane'
-    bind -n '${mod}MouseDrag2Pane' run-shell -b '\$f_mouse_event ${mod}MouseDrag2Pane'
-    bind -n '${mod}MouseDragEnd2Pane' run-shell -b '\$f_mouse_event ${mod}MouseDragEnd2Pane'
-    bind -n '${mod}MouseDown3Pane' run-shell -b '\$f_mouse_event ${mod}MouseDown3Pane'
-    bind -n '${mod}MouseUp3Pane' run-shell -b '\$f_mouse_event ${mod}MouseUp3Pane'
-    bind -n '${mod}MouseDrag3Pane' run-shell -b '\$f_mouse_event ${mod}MouseDrag3Pane'
-    bind -n '${mod}MouseDragEnd3Pane' run-shell -b '\$f_mouse_event ${mod}MouseDragEnd3Pane'
-    bind -n '${mod}SecondClick1Pane' run-shell -b '\$f_mouse_event ${mod}SecondClick1Pane'
-    bind -n '${mod}SecondClick2Pane' run-shell -b '\$f_mouse_event ${mod}SecondClick2Pane'
-    bind -n '${mod}SecondClick3Pane' run-shell -b '\$f_mouse_event ${mod}SecondClick3Pane'
-    bind -n '${mod}DoubleClick1Pane' run-shell -b '\$f_mouse_event ${mod}DoubleClick1Pane'
-    bind -n '${mod}DoubleClick2Pane' run-shell -b '\$f_mouse_event ${mod}DoubleClick2Pane'
-    bind -n '${mod}DoubleClick3Pane' run-shell -b '\$f_mouse_event ${mod}DoubleClick3Pane'
-    bind -n '${mod}TripleClick1Pane' run-shell -b '\$f_mouse_event ${mod}TripleClick1Pane'
-    bind -n '${mod}TripleClick2Pane' run-shell -b '\$f_mouse_event ${mod}TripleClick2Pane'
-    bind -n '${mod}TripleClick3Pane' run-shell -b '\$f_mouse_event ${mod}TripleClick3Pane'
-    " >>"$tmux_conf"
-    #endregion
+    header_2 "Mouse"
+    writeln "bind -n '${mod}WheelUpPane' run-shell -b '\$f_mouse_event ${mod}WheelUpPane'"
+    writeln "bind -n '${mod}WheelDownPane' run-shell -b '\$f_mouse_event ${mod}WheelDownPane'"
+    writeln "bind -n '${mod}MouseDown1Pane' run-shell -b '\$f_mouse_event ${mod}MouseDown1Pane'"
+    writeln "bind -n '${mod}MouseUp1Pane' run-shell -b '\$f_mouse_event ${mod}MouseUp1Pane'"
+    writeln "bind -n '${mod}MouseDrag1Pane' run-shell -b '\$f_mouse_event ${mod}MouseDrag1Pane'"
+    writeln "bind -n '${mod}MouseDragEnd1Pane' run-shell -b '\$f_mouse_event ${mod}MouseDragEnd1Pane'"
+    writeln "bind -n '${mod}MouseDown2Pane' run-shell -b '\$f_mouse_event ${mod}MouseDown2Pane'"
+    writeln "bind -n '${mod}MouseUp2Pane' run-shell -b '\$f_mouse_event ${mod}MouseUp2Pane'"
+    writeln "bind -n '${mod}MouseDrag2Pane' run-shell -b '\$f_mouse_event ${mod}MouseDrag2Pane'"
+    writeln "bind -n '${mod}MouseDragEnd2Pane' run-shell -b '\$f_mouse_event ${mod}MouseDragEnd2Pane'"
+    writeln "bind -n '${mod}MouseDown3Pane' run-shell -b '\$f_mouse_event ${mod}MouseDown3Pane'"
+    writeln "bind -n '${mod}MouseUp3Pane' run-shell -b '\$f_mouse_event ${mod}MouseUp3Pane'"
+    writeln "bind -n '${mod}MouseDrag3Pane' run-shell -b '\$f_mouse_event ${mod}MouseDrag3Pane'"
+    writeln "bind -n '${mod}MouseDragEnd3Pane' run-shell -b '\$f_mouse_event ${mod}MouseDragEnd3Pane'"
+    writeln "bind -n '${mod}SecondClick1Pane' run-shell -b '\$f_mouse_event ${mod}SecondClick1Pane'"
+    writeln "bind -n '${mod}SecondClick2Pane' run-shell -b '\$f_mouse_event ${mod}SecondClick2Pane'"
+    writeln "bind -n '${mod}SecondClick3Pane' run-shell -b '\$f_mouse_event ${mod}SecondClick3Pane'"
+    writeln "bind -n '${mod}DoubleClick1Pane' run-shell -b '\$f_mouse_event ${mod}DoubleClick1Pane'"
+    writeln "bind -n '${mod}DoubleClick2Pane' run-shell -b '\$f_mouse_event ${mod}DoubleClick2Pane'"
+    writeln "bind -n '${mod}DoubleClick3Pane' run-shell -b '\$f_mouse_event ${mod}DoubleClick3Pane'"
+    writeln "bind -n '${mod}TripleClick1Pane' run-shell -b '\$f_mouse_event ${mod}TripleClick1Pane'"
+    writeln "bind -n '${mod}TripleClick2Pane' run-shell -b '\$f_mouse_event ${mod}TripleClick2Pane'"
+    writeln "bind -n '${mod}TripleClick3Pane' run-shell -b '\$f_mouse_event ${mod}TripleClick3Pane'"
 }
 
 mouse_events() {
     header_2 "Mouse"
-    bind_char WheelUpPane
-    bind_char WheelDownPane
-    bind_char MouseDown1Pane
-    bind_char MouseUp1Pane
-    bind_char MouseDrag1Pane
-    bind_char MouseDragEnd1Pane
-    bind_char MouseDown2Pane
-    bind_char MouseUp2Pane
-    bind_char MouseDrag2Pane
-    bind_char MouseDragEnd2Pane
-    bind_char MouseDown3Pane
-    bind_char MouseUp3Pane
-    bind_char MouseDrag3Pane
-    bind_char MouseDragEnd3Pane
-    bind_char DoubleClick1Pane
-    bind_char DoubleClick2Pane
-    bind_char DoubleClick3Pane
-    bind_char TripleClick1Pane
-    bind_char TripleClick2Pane
-    bind_char TripleClick3Pane
+    bind_char WheelUpPane d
+    bind_char WheelDownPane d
+    bind_char MouseDown1Pane d
+    bind_char MouseUp1Pane d
+    bind_char MouseDrag1Pane d
+    bind_char MouseDragEnd1Pane d
+    bind_char MouseDown2Pane d
+    bind_char MouseUp2Pane d
+    bind_char MouseDrag2Pane d
+    bind_char MouseDragEnd2Pane d
+    bind_char MouseDown3Pane d
+    bind_char MouseUp3Pane d
+    bind_char MouseDrag3Pane d
+    bind_char MouseDragEnd3Pane d
+    bind_char DoubleClick1Pane d
+    bind_char DoubleClick2Pane d
+    bind_char DoubleClick3Pane d
+    bind_char TripleClick1Pane d
+    bind_char TripleClick2Pane d
+    bind_char TripleClick3Pane d
 
     tmux_vers_compare 3.2 || return
 
-    bind_char SecondClick1Pane
-    bind_char SecondClick2Pane
-    bind_char SecondClick3Pane
+    bind_char SecondClick1Pane d
+    bind_char SecondClick2Pane d
+    bind_char SecondClick3Pane d
 }
 
 lower_case_chars() {
@@ -443,6 +427,7 @@ regular_chars() {
 }
 
 do_keys() {
+    # mouse_event_via_script
     mouse_events
     regular_chars
     special_basic_keys
