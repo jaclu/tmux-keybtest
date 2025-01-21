@@ -4,9 +4,9 @@
 detect in your terminal. When you press a key, its tmux name, like `C-M-Up`,
 will be displayed on the status line if recognized.
 
-Teminals are often rather limited in what keys they implement supported beyond the basics.
+Terminals are often rather limited in what keys they implement supported beyond the basics.
 
-In some cases missing keys can be configured, but especiallly on tablets this is
+In some cases missing keys can be configured, but especially on tablets this is
 usually fairly limited.
 
 Terminals can sometimes misinterpret key presses, generating the wrong sequence
@@ -21,7 +21,9 @@ terminal to free up these keys for tmux use.
 ## Usage
 
 1. Clone this repository and navigate to its directory.
-2. Run `keybtest.sh` this generates a `keybtest.conf` for the version of tmux found and starts a tmux session that will display the tmux notation for any recognized key press.
+2. Run `keybtest.sh` this generates a `keybtest.conf` for the version of tmux
+found and starts a tmux session that will display the tmux notation for any
+recognized key press.
 
 ### Important Notes
 
@@ -106,7 +108,8 @@ Example:
     set -g user-keys[200] "\302\247"
     bind -n User200 send Escape
 
-Be aware that the `send Escape` in this case is only sent to apps running inside tmux. It is not picked up by tmux itself. For that `User200` must be used.
+Be aware that the `send Escape` in this case is only sent to apps running inside tmux.
+It is not picked up by tmux itself. For that `User200` must be used.
 
 This is probably amongst the least intuitive features in tmux
 
