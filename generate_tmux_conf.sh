@@ -180,16 +180,17 @@ lower_case_chars() {
 
     bind_char j
     bind_char k
-    bind_char l
+    bind_char l d
     bind_char n
     bind_char o
-    bind_char p
+    bind_char p d
     bind_char q
     bind_char r
-    bind_char s
+    bind_char s d
     bind_char t
     bind_char u
-    bind_char v
+    bind_char v d
+    bind_char w
 
     case "$mod" in
     C-)
@@ -219,7 +220,7 @@ upper_case_chars() {
     local do_it=true
 
     case "$mod" in
-    C-) return ;;
+    # C-) return ;;
     *) ;;
     esac
 
@@ -248,15 +249,15 @@ upper_case_chars() {
     bind_char L
     bind_char N
     bind_char O
-    bind_char P
+    bind_char P d
     bind_char Q
     bind_char R
-    bind_char S
+    bind_char S d
     bind_char T
     bind_char U
-    bind_char V
+    bind_char V d
     bind_char W
-    bind_char X
+    bind_char X d
     bind_char Y
     bind_char Z
     bind_char "Å"
@@ -315,9 +316,9 @@ non_letter_regular_cars() {
     bind_char "'" d
     bind_char ","
     bind_char "."
-    bind_char "<"
-    bind_char ">"
-    bind_char "?"
+    bind_char "<" d
+    bind_char ">" d
+    bind_char "?" d
 
     tmux_vers_compare 3.0 && bind_char ";" d
 
@@ -327,7 +328,7 @@ non_letter_regular_cars() {
         *) ;;
         esac
     }
-    bind_char \`
+    bind_char "\`" d
     bind_char "/"
 
     tmux_vers_compare 3.5 || {
@@ -339,11 +340,11 @@ non_letter_regular_cars() {
     bind_char '~' s
     bind_char '$' s
     bind_char % d
-    bind_char "&" d
+    bind_char "\&" d
     bind_char '*' d
     bind_char "{" d
     bind_char "}" d
-    bind_char "|"
+    bind_char "|" d
     bind_char '"' s
 }
 
@@ -397,7 +398,7 @@ above_arrows() {
 num_keyboard() {
     header_2 "Num Keyboard"
     bind_char KP/
-    bind_char KP*
+    bind_char "KP*" d
     bind_char KP-
     bind_char KP7
     bind_char KP8
