@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-#   Copyright (c) 2025: Jacob.Lundqvist@gmail.com
+#   Copyright (c) 2024-2025: Jacob.Lundqvist@gmail.com
 #   License: MIT
 #
 #   Part of https://github.com/jaclu/tmux-keybtest
@@ -71,9 +71,9 @@ base_conf() {
     writeln "set-option -g display-time 1000"
     writeln "set-option -g visual-bell on"
     writeln "set -g focus-events on"
-    tmux_vers_compare 3.2 && writeln "set -g extended-keys on"
-    # tmux_vers_compare 2.8 && writeln 'bind Any display "Not defined"'
-    tmux_vers_compare 2.9 && {
+    tmux_vers_ok 3.2 && writeln "set -g extended-keys on"
+    # tmux_vers_ok 2.8 && writeln 'bind Any display "Not defined"'
+    tmux_vers_ok 2.9 && {
         writeln
         writeln "#"
         writeln "#  Display some hints in status bar left row 2 & 3"
@@ -144,7 +144,7 @@ mouse_events() {
     bind_char TripleClick2Pane d
     bind_char TripleClick3Pane d
 
-    tmux_vers_compare 3.2 || return
+    tmux_vers_ok 3.2 || return
 
     bind_char SecondClick1Pane d
     bind_char SecondClick2Pane d
@@ -152,10 +152,9 @@ mouse_events() {
 }
 
 lower_case_chars() {
-    local do_it=true
 
     case "$mod" in
-    S- | C-S- | M-S- | C-M-S-) return ;;
+    S- | C-S- | M-S- | C-M-S-) tmux_vers_ok 3.5 || return ;;
     *) ;;
     esac
     header_1 "Lower Case"
@@ -170,13 +169,14 @@ lower_case_chars() {
 
     # Messes with Escaoe & Enter on older versions
     case "$mod" in
-    C- | C-M-) tmux_vers_compare 3.5 || do_it=false ;;
+    C- | C-M-)
+        tmux_vers_ok 3.5 && {
+            bind_char i
+            bind_char m
+        }
+        ;;
     *) ;;
     esac
-    $do_it && {
-        bind_char i
-        bind_char m
-    }
 
     bind_char j
     bind_char k
@@ -217,7 +217,6 @@ lower_case_chars() {
 }
 
 upper_case_chars() {
-    local do_it=true
 
     case "$mod" in
     # C-) return ;;
@@ -236,13 +235,14 @@ upper_case_chars() {
 
     # Messes with Escaoe & Enter on older versions
     case "$mod" in
-    C- | C-M-) tmux_vers_compare 3.5 || do_it=false ;;
+    C- | C-M-)
+        tmux_vers_ok 3.5 && {
+            bind_char I
+            bind_char M
+        }
+        ;;
     *) ;;
     esac
-    $do_it && {
-        bind_char I
-        bind_char M
-    }
 
     bind_char J
     bind_char K
@@ -274,7 +274,6 @@ upper_case_chars() {
 }
 
 non_letter_regular_cars() {
-    local do_it=true
 
     header_1 "non-letter regular keys"
     bind_char "§"
@@ -305,10 +304,9 @@ non_letter_regular_cars() {
     bind_char "+"
 
     case "$mod" in
-    C- | C-M-) tmux_vers_compare 3.5 || do_it=false ;;
+    C- | C-M-) tmux_vers_ok 3.5 && bind_char "[" ;;
     *) ;;
     esac
-    $do_it && bind_char "["
 
     bind_char "]"
     bind_char "\\\\"
@@ -320,9 +318,9 @@ non_letter_regular_cars() {
     bind_char ">" d
     bind_char "?" d
 
-    tmux_vers_compare 3.0 && bind_char ";" d
+    tmux_vers_ok 3.0 && bind_char ";" d
 
-    tmux_vers_compare 3.3 || {
+    tmux_vers_ok 3.3 || {
         case "$mod" in
         C- | C-M-) return ;;
         *) ;;
@@ -331,7 +329,7 @@ non_letter_regular_cars() {
     bind_char "\`" d
     bind_char "/"
 
-    tmux_vers_compare 3.5 || {
+    tmux_vers_ok 3.5 || {
         case "$mod" in
         C- | C-M-) return ;;
         *) ;;
@@ -360,7 +358,7 @@ special_basic_keys() {
     bind_char Left
     bind_char Right
 
-    tmux_vers_compare 3.3 || {
+    tmux_vers_ok 3.3 || {
         case "$mod" in
         C- | C-S- | C-M- | C-M-S-) return ;;
         *) ;;
@@ -463,9 +461,10 @@ process_mod() {
 #===============================================================
 
 d_tkbtst_location="$(dirname "$(realpath "$0")")"
+
 . "$d_tkbtst_location"/utils.sh
 
-tmux_vers_compare 2.4 || {
+tmux_vers_ok 2.4 || {
     echo
     echo "ERROR: This requires tmux >= 2.4!"
     echo

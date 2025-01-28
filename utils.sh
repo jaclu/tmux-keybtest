@@ -6,57 +6,56 @@
 #   Part of https://github.com/jaclu/tmux-keybtest
 #
 
-get_digits_from_string() {
-    # this is used to get "clean" integer version number. Examples:
-    # `tmux 1.9` => `19`
-    # `1.9a`     => `19`
-    local string="$1"
-    local only_digits no_leading_zero
-
-    only_digits="$(echo "$string" | tr -dC '[:digit:]')"
-    no_leading_zero=${only_digits#0}
-    echo "$no_leading_zero"
-}
-
-get_tmux_vers() {
-    #
-    #  Variables provided:
-    #   tmux_vers - version of tmux used
-    #
-    tmux_vers="$($TMUX_BIN -V | cut -d' ' -f2)"
-
-    # Filter out devel prefix and release candidate suffix
-    case "$tmux_vers" in
-    next-*)
-        # Remove "next-" prefix
-        tmux_vers="${tmux_vers#next-}"
-        ;;
-    *-rc*)
-        # Remove "-rcX" suffix, otherwise the number would mess up version
-        # 3.4-rc2 would be read as 342
-        tmux_vers="${tmux_vers%-rc*}"
-        ;;
-    *) ;;
-    esac
-}
-
-tmux_vers_compare() {
-    #
-    #  This returns true if v_comp <= v_ref
-    #  If only one param is given it is compared vs version of running tmux
-    #
-    local v_comp="$1"
-    local v_ref="${2:-$tmux_vers}"
-    local i_comp i_ref
-
-    i_comp=$(get_digits_from_string "$v_comp")
-    i_ref=$(get_digits_from_string "$v_ref")
-
-    [[ "$i_comp" -le "$i_ref" ]]
-}
-
 cleanup_tmp_files() {
     rm -f "$f_mouse_status" "$f_mouse_display_timer"
+}
+
+tmux_vers_ok() {
+    # Function Purpose:
+    # This function checks if the running version of tmux is at least the specified version.
+    #
+    get_digits_from_string() {
+        local i
+
+        i="$(echo "$1" | tr -cd '0-9')"
+        echo "$i"
+    }
+
+    get_suffix() {
+        echo "${1//[^a-zA-Z]*([0-9])([a-zA-Z]*)/\2}"
+    }
+
+    local v_comp i_comp suffix_comp
+
+    if [[ -z "$tmux_vers" ]]; then
+        # First call: retrieves and stores the current tmux version for future use
+        tmux_vers="$(tmux -V | cut -d' ' -f2)"
+        _tmux_vers_i="$(get_digits_from_string "$tmux_vers")"
+        _tmux_vers_suffix="$(get_suffix "$tmux_vers")"
+    fi
+
+    v_comp="$1"
+    i_comp="$(get_digits_from_string "$v_comp")"
+
+    # if numeric is less than reference then certain fail
+    [[ "$i_comp" -lt "$_tmux_vers_i" ]] && {
+        # echo "OK - numerically smaller"
+        return 0
+    }
+    # if numeric is greater than reference then certain fail
+    [[ "$i_comp" -gt "$_tmux_vers_i" ]] && {
+        # echo "Fail - numerically larger: $v_comp"
+        return 1
+    }
+
+    # if numerical version is same, suffix sorting decides
+    suffix_comp="$(get_suffix "$v_comp")"
+    [[ "$suffix_comp" = "$_tmux_vers_suffix" ]] ||
+        [[ "$(printf '%s\n%s\n' "$suffix_comp" "$_tmux_vers_suffix" |
+            LC_COLLATE=C sort | head -n 1)" = "$suffix_comp" ]] && return 0
+
+    # echo "Suffix Fail: $v_comp > $tmux_vers"
+    return 1
 }
 
 #===============================================================
@@ -77,8 +76,6 @@ else
     # Honour it if defined
     [[ -z "$TMUX_BIN" ]] && TMUX_BIN="tmux"
 fi
-
-get_tmux_vers
 
 # shellcheck disable=SC2034
 tmux_conf="$d_tkbtst_location"/keybtest.conf
