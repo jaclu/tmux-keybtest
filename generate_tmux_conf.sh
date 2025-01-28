@@ -31,7 +31,7 @@ header_3() {
     writeln
     writeln "#==========================================================="
     writeln "#"
-    writeln "#  $1"
+    writeln "#  Segment covering modifier: $1"
     writeln "#"
     writeln "#==========================================================="
 }
