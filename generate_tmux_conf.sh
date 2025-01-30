@@ -16,7 +16,12 @@ writeln() {
 
 header_1() {
     writeln
-    writeln "#  --  $1"
+    writeln
+    writeln "#==========================================================="
+    writeln "#"
+    writeln "#  Segment covering modifier: $1"
+    writeln "#"
+    writeln "#==========================================================="
 }
 
 header_2() {
@@ -28,12 +33,7 @@ header_2() {
 
 header_3() {
     writeln
-    writeln
-    writeln "#==========================================================="
-    writeln "#"
-    writeln "#  Segment covering modifier: $1"
-    writeln "#"
-    writeln "#==========================================================="
+    writeln "#  --  $1"
 }
 
 bind_char() {
@@ -81,15 +81,14 @@ base_conf() {
 #
 set-option -g prefix C-x
 bind C-c kill-server
-set-option -g mouse on
 set-option -s escape-time 100
 set-option -g display-time 1000
 set-option -g monitor-activity off
-set-option -g monitor-bell off
 set-option -g visual-bell on
 set-option -g focus-events on"
     #endregion
-
+    tmux_vers_ok 2.4 && writeln "set-option -g monitor-bell off"
+    tmux_vers_ok 2.1 && writeln "set-option -g mouse on"
     tmux_vers_ok 2.8 && writeln "bind Any display 'This key is not bound to any action'"
     tmux_vers_ok 3.2 && writeln "set-option -g extended-keys on"
 
@@ -116,13 +115,14 @@ set-option -g default-command '/bin/sh'
     #endregion
 
     tmux_vers_ok 2.9 && {
+        _line_1="Displays keys and mouse events recognized by tmux in status-bar"
         #region Display some hints in status bar left row 2 & 3
         writeln "
 #
 #  Display some hints in status bar left row 2 & 3
 #
 set-option -g status 3
-set-option -g status-format[1] 'Displays keys and mouse events recognized by tmux in status-bar'
+set-option -g status-format[1] '$_line_1'
 set-option -g status-format[2] 'To exit press C-x then C-c. To test C-x press it twice'"
         #endregion
     }
@@ -181,7 +181,7 @@ mouse_event_via_script() {
     bind_mouse_event TripleClick3Pane
 }
 
-mouse_123_loop() {
+mouse_event_loop() {
     local old_ifs="$IFS"
     local events_123=(
         MouseDown
@@ -296,10 +296,17 @@ mouse_123_loop() {
 lower_case_chars() {
 
     case "$mod" in
-    S- | C-S- | M-S- | C-M-S-) tmux_vers_ok 3.5 || return ;;
+    S- | C-S- | M-S- | C-M-S-)
+        if ! tmux_vers_ok 3.5; then
+            writeln
+            writeln "# Prior to 3.5 C- C-M- i & m overrides tab and Enter"
+            writeln
+            return
+        fi
+        ;;
     *) ;;
     esac
-    header_1 "Lower Case"
+    header_3 "Lower Case"
     bind_char a
     bind_char b
     bind_char c
@@ -312,12 +319,25 @@ lower_case_chars() {
     # Messes with Escaoe & Enter on older versions
     case "$mod" in
     C- | C-M-)
-        tmux_vers_ok 3.5 && {
+        if tmux_vers_ok 3.5; then
+            writeln
+            writeln "# Grouped, since they are handled by the same special case"
             bind_char i
             bind_char m
-        }
+            writeln
+        else
+            writeln
+            writeln "# Prior to 3.5 C- C-M- i & m overrides tab and Enter"
+            writeln
+        fi
         ;;
-    *) ;;
+    *)
+        writeln
+        writeln "# Grouped, since they are handled by the same special case"
+        bind_char i
+        bind_char m
+        writeln
+        ;;
     esac
 
     bind_char j
@@ -350,7 +370,7 @@ lower_case_chars() {
         bind_char ä
         bind_char ö
 
-        header_1 "acute accent"
+        header_3 "acute accent"
         bind_char á
         bind_char é
         bind_char í
@@ -364,9 +384,15 @@ upper_case_chars() {
 
     case "$mod" in
     C- | C-M-)
-        tmux_vers_ok 3.5a || {
-            #region
+        if ! tmux_vers_ok 3.2; then
+            writeln
+            writeln "# Prior to 3.2 Uppercase Ctrl is ignored by tmux"
+            writeln
+            return
+        elif ! tmux_vers_ok 3.5a; then
+            #region Blurb about using C-S-A instead of C-A
             writeln "
+#
 #  Pior to 3.5a tmux didn't handle C-uppercase properly.
 #  I will use a/A to make the samples easier to write but is the same for all uppercases.
 #
@@ -379,15 +405,16 @@ upper_case_chars() {
 #  Same if you add M- as an additional prefix.
 #
 #  thus C- / C-M- Uppercase is skipped for this tmux version.
+#
 "
-            #emdregion
+            #endregion
             return
-        }
+        fi
         ;;
     *) ;;
     esac
 
-    header_1 "Upper Case"
+    header_3 "Upper Case"
     bind_char A
     bind_char B
     bind_char C
@@ -400,10 +427,15 @@ upper_case_chars() {
     # Messes with Escaoe & Enter on older versions
     case "$mod" in
     C- | C-M-)
-        tmux_vers_ok 3.5 && {
+        if tmux_vers_ok 3.5; then
             bind_char I
             bind_char M
-        }
+        else
+            writeln
+            writeln "# Prior to 3.5 C- C-M- I & M overrides tab and Enter"
+            writeln '~ $ % & * { } | " '
+            writeln
+        fi
         ;;
     *) ;;
     esac
@@ -424,24 +456,29 @@ upper_case_chars() {
     bind_char X
     bind_char Y
     bind_char Z
-    tmux_vers_ok 2.2 && {
+    if tmux_vers_ok 2.2; then
         bind_char Å
         bind_char Ä
         bind_char Ö
 
-        header_1 "acute accent"
+        header_3 "acute accent"
         bind_char Á
         bind_char É
         bind_char Í
         bind_char Ó
         bind_char Ú
         bind_char Ý
-    }
+    else
+        writeln
+        writeln "# Prior to 2.2 Umlaut & accented characters can't be bound"
+        writeln "# Such as: Å Ä Ö Á É Ý ..."
+        writeln
+    fi
 }
 
 non_letter_regular_cars() {
 
-    header_1 "non-letter regular keys"
+    header_3 "non-letter regular keys"
     bind_char "1"
     bind_char "2"
     bind_char "3"
@@ -472,8 +509,16 @@ non_letter_regular_cars() {
     bind_char "+"
 
     case "$mod" in
-    C- | C-M-) tmux_vers_ok 3.5 && bind_char "[" ;;
-    *) ;;
+    C- | C-M-)
+        if tmux_vers_ok 3.5; then
+            bind_char "["
+        else
+            writeln
+            writeln "# Prior to 3.5 [ can not be bound with C- C-M- would override Escape"
+            writeln
+        fi
+        ;;
+    *) bind_char "[" ;;
     esac
 
     bind_char "]"
@@ -499,7 +544,13 @@ non_letter_regular_cars() {
 
     tmux_vers_ok 3.5 || {
         case "$mod" in
-        C- | C-M-) return ;;
+        C- | C-M-)
+            writeln
+            writeln "# Prior to 3.5 theese are not possible to bind with C- C-M-:"
+            writeln '~ $ % & * { } | " '
+            writeln
+            return
+            ;;
         *) ;;
         esac
     }
@@ -528,7 +579,12 @@ special_basic_keys() {
 
     tmux_vers_ok 3.3 || {
         case "$mod" in
-        C- | C-S- | C-M- | C-M-S-) return ;;
+        C- | C-S- | C-M- | C-M-S-)
+            writeln
+            writeln "# Prior to 3.3 it is not possible to bind Escape with C- C-S- C-M- C-M-S-:"
+            writeln
+            return
+            ;;
         *) ;;
         esac
     }
@@ -584,7 +640,12 @@ num_keyboard() {
 regular_chars() {
     header_2 "Regular keys"
     case "$mod" in
-    S-) return ;; # none in this group can be bound to S-
+    S-)
+        writeln
+        writeln "# It is not meaningfull to bind loswercase with S-"
+        writeln
+        return
+        ;; # none in this group can be bound to S-
     C-S- | ˚¡M-S- | C-M-S-) ;;
     *)
         lower_case_chars
@@ -596,14 +657,17 @@ regular_chars() {
 }
 
 do_keys() {
-    # mouse_123_loop
-    # mouse_event_via_script
-    # mouse_events
+    # tmux_vers_ok 2.1 && {
+    #     mouse_event_loop
+    #     # mouse_event_via_script
+    #     # mouse_events
+    #     :
+    # }
     regular_chars
-    special_basic_keys
-    func_keys
-    above_arrows
-    num_keyboard
+    # special_basic_keys
+    # func_keys
+    # above_arrows
+    # num_keyboard
 }
 
 process_mod() {
@@ -620,7 +684,7 @@ process_mod() {
     *) mod_long="Unknown mod: $mod" ;;
     esac
 
-    header_3 "$mod_long"
+    header_1 "$mod_long"
 
     do_keys
 }
