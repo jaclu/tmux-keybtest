@@ -51,105 +51,247 @@ bind_char() {
     writeln "$output"
 }
 
+bind_mouse_event() {
+    local output="bind -n "
+
+    [[ -z "$1" ]] && {
+        echo "ERROR: call to bind_run() with no param"
+        exit 1
+    }
+    output+="'${mod}$1' run-shell -b '$f_mouse_event ${mod}$1'"
+    writeln "$output"
+
+}
+
 base_conf() {
-    writeln "#==========================================================="
-    writeln "#"
-    writeln "#  Tmux conf for teting keyboard implementation, and what"
-    writeln "#  non standard sequences it can generate. - Arrows with modifiers etc"
-    writeln "#"
-    writeln "#==========================================================="
-    writeln ""
-    writeln "# Created for tmux version: $tmux_vers"
-    writeln ""
-    writeln "#"
-    writeln "#  Minimal config"
-    writeln "#"
-    writeln "set-option -g prefix C-x"
-    writeln "bind C-c kill-server"
-    writeln "set-option -g mouse on"
-    writeln "set-option -s escape-time 100"
-    writeln "set-option -g display-time 1000"
-    writeln "set-option -g visual-bell on"
-    writeln "set -g focus-events on"
-    tmux_vers_ok 3.2 && writeln "set -g extended-keys on"
-    # tmux_vers_ok 2.8 && writeln 'bind Any display "Not defined"'
+    #region base config
+    # shellcheck disable=SC2154
+    writeln "#===========================================================
+#
+#  Tmux conf for teting keyboard implementation, and what
+#  non standard sequences it can generate. - Arrows with modifiers etc
+# Created for tmux version: $tpt_current_vers
+#   int:    $tpt_current_vers_i
+#   suffix: $tpt_current_vers_suffix
+#
+#===========================================================
+
+#
+#  Base config
+#
+set-option -g prefix C-x
+bind C-c kill-server
+set-option -g mouse on
+set-option -s escape-time 100
+set-option -g display-time 1000
+set-option -g monitor-activity off
+set-option -g monitor-bell off
+set-option -g visual-bell on
+set-option -g focus-events on"
+    #endregion
+
+    tmux_vers_ok 2.8 && writeln "bind Any display 'This key is not bound to any action'"
+    tmux_vers_ok 3.2 && writeln "set-option -g extended-keys on"
+
+    #region Display current tmux vers in Status bar left
+    writeln "
+#
+# Display currently used tmux version in Status bar left
+#
+set-option -g status-left-length 20
+set-option -g status-left 'tmux version:#[fg=white,bg=black]$tpt_current_vers#[default] '
+"
+    #endregion
+
+    #region Display prefix key pressed in Status bar right
+    writeln "
+#
+# Display prefix key pressed in Status bar right
+#
+set-option -g status-right-length 0
+set-option -g status-right '#{?client_prefix,Prefix #[fg=colour231]#[bg=colour04]C-x#[default] - Press C-c to exit,}'
+# run-shell -b 'sleep 0.5 ; tmux send-keys \"showkey -a\" C-M'
+set-option -g default-command '/bin/sh'
+"
+    #endregion
+
     tmux_vers_ok 2.9 && {
-        writeln
-        writeln "#"
-        writeln "#  Display some hints in status bar left row 2 & 3"
-        writeln "#"
-        writeln "set-option -g status 3"
-        writeln "set-option -g status-format[1] 'Displays keys and mouse events recognized by tmux in status-bar'"
-        writeln "set-option -g status-format[2] 'To exit press C-x then C-c. To test C-x press it twice'"
+        #region Display some hints in status bar left row 2 & 3
+        writeln "
+#
+#  Display some hints in status bar left row 2 & 3
+#
+set-option -g status 3
+set-option -g status-format[1] 'Displays keys and mouse events recognized by tmux in status-bar'
+set-option -g status-format[2] 'To exit press C-x then C-c. To test C-x press it twice'"
+        #endregion
     }
 
-    writeln
-    writeln "#"
-    writeln "# Display prefix key pressed in Status bar right"
-    writeln "#"
-    writeln "set-option -g status-right-length 0"
-    writeln "set-option -g status-right '#{?client_prefix,Prefix #[fg=colour231]#[bg=colour04]C-x#[default] - Press C-c to exit,}'"
-    writeln "run-shell -b 'sleep 0.5 ; tmux send-keys \"showkey -a\" C-M'"
+    #     tmux_vers_ok 3.0 && {
+    #         #region unbind default popup menus
+    #         writeln "
+    # #======================================================
+    # #
+    # #   Remove unwanted default popup menus
+    # #
+    # #======================================================
+    # unbind  -n  MouseDown3Pane
+    # unbind  -n  MouseDown3Status
+    # unbind  -n  MouseDown3StatusLeft
+    # unbind  -n  M-MouseDown3Pane"
+    #         #endregion
+    #     }
+    #     ! tmux_vers_ok 3.1 && writeln "unbind  -n  MouseDown3StatusRight"
+    #     tmux_vers_ok "3.0a" && {
+    #         writeln "unbind  <"
+    #         writeln "unbind  >"
+    #     }
+    #     tmux_vers_ok 3.4 && {
+    #         writeln "unbind  -n  M-MouseDown3Status"
+    #         writeln "unbind  -n  M-MouseDown3StatusLeft"
+    #     }
 }
 
 mouse_event_via_script() {
     # Doesn't work right now, using mouse_events() instead
 
-    header_2 "Mouse"
-    writeln "bind -n '${mod}WheelUpPane' run-shell -b '\$f_mouse_event ${mod}WheelUpPane'"
-    writeln "bind -n '${mod}WheelDownPane' run-shell -b '\$f_mouse_event ${mod}WheelDownPane'"
-    writeln "bind -n '${mod}MouseDown1Pane' run-shell -b '\$f_mouse_event ${mod}MouseDown1Pane'"
-    writeln "bind -n '${mod}MouseUp1Pane' run-shell -b '\$f_mouse_event ${mod}MouseUp1Pane'"
-    writeln "bind -n '${mod}MouseDrag1Pane' run-shell -b '\$f_mouse_event ${mod}MouseDrag1Pane'"
-    writeln "bind -n '${mod}MouseDragEnd1Pane' run-shell -b '\$f_mouse_event ${mod}MouseDragEnd1Pane'"
-    writeln "bind -n '${mod}MouseDown2Pane' run-shell -b '\$f_mouse_event ${mod}MouseDown2Pane'"
-    writeln "bind -n '${mod}MouseUp2Pane' run-shell -b '\$f_mouse_event ${mod}MouseUp2Pane'"
-    writeln "bind -n '${mod}MouseDrag2Pane' run-shell -b '\$f_mouse_event ${mod}MouseDrag2Pane'"
-    writeln "bind -n '${mod}MouseDragEnd2Pane' run-shell -b '\$f_mouse_event ${mod}MouseDragEnd2Pane'"
-    writeln "bind -n '${mod}MouseDown3Pane' run-shell -b '\$f_mouse_event ${mod}MouseDown3Pane'"
-    writeln "bind -n '${mod}MouseUp3Pane' run-shell -b '\$f_mouse_event ${mod}MouseUp3Pane'"
-    writeln "bind -n '${mod}MouseDrag3Pane' run-shell -b '\$f_mouse_event ${mod}MouseDrag3Pane'"
-    writeln "bind -n '${mod}MouseDragEnd3Pane' run-shell -b '\$f_mouse_event ${mod}MouseDragEnd3Pane'"
-    writeln "bind -n '${mod}SecondClick1Pane' run-shell -b '\$f_mouse_event ${mod}SecondClick1Pane'"
-    writeln "bind -n '${mod}SecondClick2Pane' run-shell -b '\$f_mouse_event ${mod}SecondClick2Pane'"
-    writeln "bind -n '${mod}SecondClick3Pane' run-shell -b '\$f_mouse_event ${mod}SecondClick3Pane'"
-    writeln "bind -n '${mod}DoubleClick1Pane' run-shell -b '\$f_mouse_event ${mod}DoubleClick1Pane'"
-    writeln "bind -n '${mod}DoubleClick2Pane' run-shell -b '\$f_mouse_event ${mod}DoubleClick2Pane'"
-    writeln "bind -n '${mod}DoubleClick3Pane' run-shell -b '\$f_mouse_event ${mod}DoubleClick3Pane'"
-    writeln "bind -n '${mod}TripleClick1Pane' run-shell -b '\$f_mouse_event ${mod}TripleClick1Pane'"
-    writeln "bind -n '${mod}TripleClick2Pane' run-shell -b '\$f_mouse_event ${mod}TripleClick2Pane'"
-    writeln "bind -n '${mod}TripleClick3Pane' run-shell -b '\$f_mouse_event ${mod}TripleClick3Pane'"
+    header_2 "Mouse via script"
+    bind_mouse_event WheelUpPane
+    bind_mouse_event WheelDownPane
+    bind_mouse_event MouseDown1Pane
+    bind_mouse_event MouseUp1Pane
+    bind_mouse_event MouseDrag1Pane
+    bind_mouse_event MouseDragEnd1Pane
+    bind_mouse_event MouseDown2Pan
+    bind_mouse_event MouseUp2Pane
+    bind_mouse_event MouseDrag2Pane
+    bind_mouse_event MouseDragEnd2Pane
+    bind_mouse_event MouseDown3Pane
+    bind_mouse_event MouseUp3Pane
+    bind_mouse_event MouseDrag3Pane
+    bind_mouse_event MouseDragEnd3Pane
+    bind_mouse_event SecondClick1Pane
+    bind_mouse_event SecondClick2Pane
+    bind_mouse_event SecondClick3Pane
+    bind_mouse_event DoubleClick1Pane
+    bind_mouse_event DoubleClick2Pane
+    bind_mouse_event DoubleClick3Pane
+    bind_mouse_event TripleClick1Pane
+    bind_mouse_event TripleClick2Pane
+    bind_mouse_event TripleClick3Pane
 }
 
-mouse_events() {
-    header_2 "Mouse"
-    bind_char WheelUpPane d
-    bind_char WheelDownPane d
-    bind_char MouseDown1Pane d
-    bind_char MouseUp1Pane d
-    bind_char MouseDrag1Pane d
-    bind_char MouseDragEnd1Pane d
-    bind_char MouseDown2Pane d
-    bind_char MouseUp2Pane d
-    bind_char MouseDrag2Pane d
-    bind_char MouseDragEnd2Pane d
-    bind_char MouseDown3Pane d
-    bind_char MouseUp3Pane d
-    bind_char MouseDrag3Pane d
-    bind_char MouseDragEnd3Pane d
-    bind_char DoubleClick1Pane d
-    bind_char DoubleClick2Pane d
-    bind_char DoubleClick3Pane d
-    bind_char TripleClick1Pane d
-    bind_char TripleClick2Pane d
-    bind_char TripleClick3Pane d
+mouse_123_loop() {
+    local old_ifs="$IFS"
+    local events_123=(
+        MouseDown
+        MouseUp
+        MouseDrag
+        MouseDragEnd
+    )
+    local buttons=(
+        1
+        2
+        3
+    )
+    local locations=(
+        Pane
+        Border
+        Status
+    )
+    local event button location
 
-    tmux_vers_ok 3.2 || return
+    tmux_vers_ok 3.2 && {
+        events_123+=(
+            SecondClick
+        )
+    }
+    tmux_vers_ok 2.4 && {
+        events_123+=(
+            DoubleClick
+            TripleClick
+        )
+    }
+    tmux_vers_ok 2.9 && {
+        locations+=(
+            StatusLeft
+            StatusRight
+            StatusDefault
+        )
+    }
 
-    bind_char SecondClick1Pane d
-    bind_char SecondClick2Pane d
-    bind_char SecondClick3Pane d
+    tmux_vers_ok 3.2 && {
+        events_123+=(
+            SecondClick
+        )
+    }
+    old_ifs="$IFS"
+    IFS=$'\n'
+    for event in "${events_123[@]}"; do
+        for button in "${buttons[@]}"; do
+            for location in "${locations[@]}"; do
+                # bind_mouse_event "${event}${button}${location}"
+                bind_char "${event}${button}${location}" d
+            done
+        done
+    done
+
+    IFS="$old_ifs"
 }
+
+# mouse_events_new() {
+#     # mouse suffixes
+#     mouse_wheel="WheelUp WheelDown"
+#     # for all mouse events
+#     location_suffixes="Border/Status/StatusLeft/StatusRight"
+
+#     # old_ifs=""$IFS""
+#     # IFS=""$separator""
+
+#     # for item in $items; do
+#     #     [[ -z ""$item"" ]] && continue
+#     #     log_it " item: "$item""
+#     #     case ""$item"" in
+#     #     */*) loop_over_sub_items ""$item"" ;;
+#     #     *)
+#     #         is_it_available ""$item"" || add_missing_dependeny ""$item""
+#     #         ;;
+#     #     esac
+#     # done
+
+#     # IFS=""$old_ifs""
+# }
+
+# mouse_events() {
+#     header_2 "Mouse"
+#     #region Mouse
+#     bind_char WheelUpPane d
+#     bind_char WheelDownPane d
+#     bind_char MouseDown1Pane d
+#     bind_char MouseUp1Pane d
+#     bind_char MouseDrag1Pane d
+#     bind_char MouseDragEnd1Pane d
+#     bind_char MouseDown2Pane d
+#     bind_char MouseUp2Pane d
+#     bind_char MouseDrag2Pane d
+#     bind_char MouseDragEnd2Pane d
+#     bind_char MouseDown3Pane d
+#     bind_char MouseUp3Pane d
+#     bind_char MouseDrag3Pane d
+#     bind_char MouseDragEnd3Pane d
+#     bind_char DoubleClick1Pane d
+#     bind_char DoubleClick2Pane d
+#     bind_char DoubleClick3Pane d
+#     bind_char TripleClick1Pane d
+#     bind_char TripleClick2Pane d
+#     bind_char TripleClick3Pane d
+
+#     tmux_vers_ok 3.2 || return
+
+#     bind_char SecondClick1Pane d
+#     bind_char SecondClick2Pane d
+#     bind_char SecondClick3Pane d
+# }
 
 lower_case_chars() {
 
@@ -194,7 +336,7 @@ lower_case_chars() {
 
     case "$mod" in
     C-)
-        # Special case bind this to the root table, in order to display prefix
+        # Special case dont bind this to the root table, in order to display prefix
         # on second press
         writeln "bind '${mod}x' display-message '${mod}x'"
         ;;
@@ -203,23 +345,45 @@ lower_case_chars() {
 
     bind_char y
     bind_char z
-    bind_char "å"
-    bind_char "ä"
-    bind_char "ö"
+    tmux_vers_ok 2.2 && {
+        bind_char å
+        bind_char ä
+        bind_char ö
 
-    header_1 "acute accent"
-    bind_char "á"
-    bind_char "é"
-    bind_char "í"
-    bind_char "ó"
-    bind_char "ú"
-    bind_char "ý"
+        header_1 "acute accent"
+        bind_char á
+        bind_char é
+        bind_char í
+        bind_char ó
+        bind_char ú
+        bind_char ý
+    }
 }
 
 upper_case_chars() {
 
     case "$mod" in
-    # C-) return ;;
+    C- | C-M-)
+        tmux_vers_ok 3.5a || {
+            #region
+            writeln "
+#  Pior to 3.5a tmux didn't handle C-uppercase properly.
+#  I will use a/A to make the samples easier to write but is the same for all uppercases.
+#
+#  Any action bound to C-A will be associated with C-a, overwriting anything already
+#  bound to C-a. C-A is not recognized as input by tmux.
+#
+#  What intuitively would be thought of as C-A does not exist in tmux at this time.
+#  It has to be referred to as C-S-a, C-S-A, S-C-a or S-C-A
+#
+#  Same if you add M- as an additional prefix.
+#
+#  thus C- / C-M- Uppercase is skipped for this tmux version.
+"
+            #emdregion
+            return
+        }
+        ;;
     *) ;;
     esac
 
@@ -257,26 +421,27 @@ upper_case_chars() {
     bind_char U
     bind_char V d
     bind_char W
-    bind_char X d
+    bind_char X
     bind_char Y
     bind_char Z
-    bind_char "Å"
-    bind_char "Ä"
-    bind_char "Ö"
+    tmux_vers_ok 2.2 && {
+        bind_char Å
+        bind_char Ä
+        bind_char Ö
 
-    header_1 "acute accent"
-    bind_char "Á"
-    bind_char "É"
-    bind_char "Í"
-    bind_char "Ó"
-    bind_char "Ú"
-    bind_char "Ý"
+        header_1 "acute accent"
+        bind_char Á
+        bind_char É
+        bind_char Í
+        bind_char Ó
+        bind_char Ú
+        bind_char Ý
+    }
 }
 
 non_letter_regular_cars() {
 
     header_1 "non-letter regular keys"
-    bind_char "§"
     bind_char "1"
     bind_char "2"
     bind_char "3"
@@ -287,20 +452,23 @@ non_letter_regular_cars() {
     bind_char "8"
     bind_char "9"
     bind_char "0"
-    bind_char "±" # plus-minus sign
-    bind_char "°" # degree symbol
+    tmux_vers_ok 2.2 && {
+        bind_char §
+        bind_char ± # plus-minus sign
+        bind_char ° # degree symbol
+        bind_char £
+        bind_char €
+        bind_char "´"
+    }
     bind_char "!"
     bind_char "@"
-    bind_char "#" s
-    bind_char "£"
-    bind_char "€"
+    bind_char '#' s
     bind_char "^"
     bind_char "("
     bind_char ")"
     bind_char "-"
     bind_char "_"
     bind_char "="
-    bind_char "´"
     bind_char "+"
 
     case "$mod" in
@@ -309,7 +477,7 @@ non_letter_regular_cars() {
     esac
 
     bind_char "]"
-    bind_char "\\\\"
+    bind_char "\\\\" d
     bind_char ":"
     bind_char "'" d
     bind_char ","
@@ -322,7 +490,7 @@ non_letter_regular_cars() {
 
     tmux_vers_ok 3.3 || {
         case "$mod" in
-        C- | C-M-) return ;;
+        "C-" | "C-M-") return ;;
         *) ;;
         esac
     }
@@ -414,20 +582,23 @@ num_keyboard() {
 }
 
 regular_chars() {
+    header_2 "Regular keys"
     case "$mod" in
-    S- | C-S- | M-S- | C-M-S-) return ;;
-    *) ;;
+    S-) return ;; # none in this group can be bound to S-
+    C-S- | ˚¡M-S- | C-M-S-) ;;
+    *)
+        lower_case_chars
+        non_letter_regular_cars
+        ;;
     esac
 
-    header_2 "Regular keys"
-    lower_case_chars
     upper_case_chars
-    non_letter_regular_cars
 }
 
 do_keys() {
+    # mouse_123_loop
     # mouse_event_via_script
-    mouse_events
+    # mouse_events
     regular_chars
     special_basic_keys
     func_keys
@@ -462,16 +633,19 @@ process_mod() {
 
 d_tkbtst_location="$(dirname "$(realpath "$0")")"
 
+# shellcheck source=utils.sh
 . "$d_tkbtst_location"/utils.sh
 
-tmux_vers_ok 2.4 || {
-    echo
-    echo "ERROR: This requires tmux >= 2.4!"
-    echo
-    exit 1
-}
+# tmux_vers_ok 2.4 || {
+#     echo
+#     echo "ERROR: This requires tmux >= 2.4!"
+#     echo
+#     exit 1
+# }
 
 rm -f "$tmux_conf"
+tpt_retrieve_running_tmux_vers
+
 base_conf
 process_mod ""
 process_mod "S-"

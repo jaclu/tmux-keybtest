@@ -12,7 +12,7 @@ source "$d_tkbtst_location"/utils.sh
 cleanup_tmp_files
 
 # Generate fresh tmux conf, to ensure it matches the installed version
-"$d_tkbtst_location"/generate_tmux_conf.sh
+# "$d_tkbtst_location"/generate_tmux_conf.sh
 
 #
 # use pid of this script to make socket unique. This allows more than one

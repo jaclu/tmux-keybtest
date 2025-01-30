@@ -29,7 +29,9 @@ else
     [[ -z "$TMUX_BIN" ]] && TMUX_BIN="tmux"
 fi
 
-# shellcheck source=./tmux-plugin-tools.sh
+d_tmp="${TMPDIR:-/tmp}"
+
+# shellcheck source=/dev/null
 source "$d_tkbtst_location"/tmux-plugin-tools.sh
 
 #
@@ -38,8 +40,8 @@ source "$d_tkbtst_location"/tmux-plugin-tools.sh
 # shellcheck disable=SC2034
 tmux_conf="$d_tkbtst_location"/keybtest.conf
 
-# location for socet files
-d_tmp="${TMPDIR:-/tmp}"
+# shellcheck disable=SC2034
+f_mouse_event="$d_tkbtst_location"/mouse_event.sh
 
 # shellcheck disable=SC2154
 socket_name="$(basename "$(echo "$TMUX" | cut -d, -f 1)")"

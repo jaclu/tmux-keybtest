@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 #   Copyright (c) 2024-2025: Jacob.Lundqvist@gmail.com
 #   License: MIT
@@ -15,7 +15,7 @@
 
 d_tkbtst_location="$(dirname "$(realpath "$0")")"
 
-# shellcheck source=/dev/null
+# shellcheck source=utils.sh
 . "$d_tkbtst_location"/utils.sh
 
 #tmux display-message -p "$1"
@@ -25,9 +25,9 @@ d_tkbtst_location="$(dirname "$(realpath "$0")")"
 # shellcheck disable=SC2154
 echo "$1" >"$f_mouse_status"
 # shellcheck disable=SC2154
-[ -f "$f_mouse_display_timer" ] && exit 0
+[[ -f "$f_mouse_display_timer" ]] && exit 0
 touch "$f_mouse_display_timer"
 
-sleep 0.8
-tmux display-message -p "$(cat "$f_mouse_status")"
+sleep 0.1
+$TMUX_BIN display-message "$(cat "$f_mouse_status")"
 cleanup_tmp_files

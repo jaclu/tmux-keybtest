@@ -1,10 +1,6 @@
 #!/bin/sh
 
 #
-#  Insertion date: 2025-01-28
-#
-
-#
 # To make this safer to include in other code, functions and variables
 # believed to be of use outside this are prefixed with tpt_
 # all other variables use _ prefix to clearly list them as temporary.
@@ -33,11 +29,7 @@ tmux_vers_ok() {
     _v_comp="$1" # Desired minimum version to check against
 
     # Retrieve and cache the current tmux version on the first call
-    if [ -z "$tpt_current_vers" ]; then
-        tpt_current_vers="$(tmux -V | cut -d' ' -f2)"
-        tpt_current_vers_i="$(tpt_digits_from_string "$tpt_current_vers")"
-        tpt_current_vers_suffix="$(tpt_tmux_vers_suffix "$tpt_current_vers")"
-    fi
+    [ -z "$tpt_current_vers" ] && tpt_retrieve_running_tmux_vers
 
     # Compare numeric parts first for quick decisions.
     _i_comp="$(tpt_digits_from_string "$_v_comp")"
@@ -93,13 +85,13 @@ tpt_dependency_check() {
     #
     # Defined Variables:
     #   tpt_missing_dependencies - Holds a list of missing tools if any are found.
+    #
     tpt_log_it "dependency_check($1)"
 
     _dependencies="$1"
     tpt_define_plugin_env
-    tpt_d_plugin="$(dirname "$(realpath "$0")")"
-    tpt_plugin_name="$(basename "$(dirname "$(realpath "$0")")")"
 
+    # shellcheck disable=SC2154
     [ "$tpt_debug_mode" = "1" ] && tpt_display_env
 
     if tpt_verify_dependencies "$_dependencies"; then
@@ -133,12 +125,28 @@ tpt_dependency_check() {
 #
 #---------------------------------------------------------------
 
+tpt_retrieve_running_tmux_vers() {
+    #
+    # If the variables defining the currently used tmux version needs to
+    # be accessed before the first call to tmux_vers_ok this can be called.
+    #
+    # Only assign if it hasn't already been done
+    [ -n "$tpt_current_vers" ] && return
+
+    tpt_current_vers="$(tmux -V | cut -d' ' -f2)"
+    tpt_current_vers_i="$(tpt_digits_from_string "$tpt_current_vers")"
+    tpt_current_vers_suffix="$(tpt_tmux_vers_suffix "$tpt_current_vers")"
+
+}
+
 # Extracts all numeric digits from a string, ignoring other characters.
 # Example inputs and outputs:
 #   "tmux 1.9" => "19"
 #   "1.9a"     => "19"
 tpt_digits_from_string() {
-    _i="$(echo "$1" | tr -cd '0-9')" # Use 'tr' to keep only digits
+    # the first sed removes -rc suffixes, to avoid anny numerical rc like -rc1 from
+    # being included in the int extraction
+    _i="$(echo "$1" | sed 's/-rc[0-9]*//' | tr -cd '0-9')" # Use 'tr' to keep only digits
     echo "$_i"
 }
 
@@ -156,6 +164,23 @@ tpt_tmux_vers_suffix() {
 #   Dependency check related support functions
 #
 #---------------------------------------------------------------
+
+tpt_define_plugin_env() {
+    #
+    # Attempts to figure out some env related settings based on full path
+    # to script calling this
+    #
+    [ -n "$tpt_plugin_name" ] && return # no need to be done more than once
+
+    # Assume plugin name is folder name following ../plugins/
+    # o="/Users/jaclu/.tmux/plugins/tmux-menus/scripts/menus.tmux"
+    tpt_plugin_name="$(echo "$0" | grep plugins | sed 's#plugins/# #' | cut -d' ' -f 2 | cut -d/ -f 1)"
+    [ -n "$tpt_plugin_name" ] && {
+        # tpt_d_plugin="$(echo "$0" | sed 's#plugins/# #' | cut -d' ' -f 1)"
+        # alt method:
+        tpt_d_plugin="$(echo "$0" | sed "s#$tpt_plugin_name#$tpt_plugin_name\|#" | cut -d'|' -f1)"
+    }
+}
 
 tpt_display_env() {
     tpt_log_it "tpt_d_plugin: $tpt_d_plugin"
@@ -232,6 +257,32 @@ tpt_testing() {
 #   Main
 #
 #===============================================================
+
 # Only set this if undefined
 [ -z "$TMUX_BIN" ] && TMUX_BIN="tmux"
-tpt_debug_mode=0
+
+#
+# Call this to get access to some best guesses for:
+#   tpt_plugin_name
+#   tpt_d_plugin    - the plugin folder
+#
+# This will be done on fist call to pt_dependency_check(), so not needed in
+# normal usage
+#
+# tpt_define_plugin_env
+
+
+#
+# Call this to get access to info about current tmux:
+#   tpt_current_vers         - full name of available tmux version
+#   tpt_current_vers_i       - int part of version
+#   tpt_current_vers_suffix  - version suffix
+#
+# This will be done on fist call to tmux_vers_ok(), so not needed in
+# normal usage
+#
+# tpt_retrieve_running_tmux_vers
+
+
+# Enable for testing / debugging
+# tpt_debug_mode=1

@@ -22,8 +22,8 @@ terminal to free up these keys for tmux use.
 
 1. Clone this repository and navigate to its directory.
 2. Run `keybtest.sh` this generates a `keybtest.conf` for the version of tmux
-found and starts a tmux session that will display the tmux notation for any
-recognized key press.
+   found and starts a tmux session that will display the tmux notation for any
+   recognized key press.
 
 ### Important Notes
 
@@ -49,37 +49,38 @@ terminal's capabilities.
 
 - Shifted regular keys are not tested. Instead of binding `S-a` or `S-A`,
   use `A`.
+- non-letter regular chars (such as ! @ $) can not be bound to this
 
 ### Control `C-`
 
-- Prior to 3.5 - Cannot be bound: `~ $ % & * { } | "`
+- Prior to 3.5
+  - Cannot be bound: `~ $ % & * { } | "`
+  - Case is ignored: Binding `C-A` will be mapped to `C-a`. `C-A` is not a recognised key.
+    If `C-A` is really wanted, the unintuitive workaround is to use `C-S-A` / `C-S-a`
+  - Keys skipped due to collision:
+    - `C-i` is the same as `Tab`
+    - `C-m` is the same as `Enter`
+    - `C-[` is the same as `Escape`
+- 3.5a - Ironically, since `C-` uppercase is now recognized, but doesn't actually work,
+  this also causes the previous `C-S-` workaround to be ignored.
 - Prior to 3.3 - Cannot be bound: `` ` /``
 - Prior to 3.0 - Cannot be bound: `;`
-- Case is ignored: Binding `C-A` after `C-a` will override `C-a`, so only
-  lowercase is bound.
-- Keys skipped due to collision:
-  - `C-i` is the same as `Tab`
-  - `C-m` is the same as `Enter`
-  - `C-[` is the same as `Escape`
 
 ### Control Shift `C-S-`
 
-- Regular keys not tested, same as with `S-`.
+- From the regular keys only uppercase can be bound
 
 ### Meta Shift `M-S-`
 
-- Regular keys not tested, same as with `S-`.
+- Same limitations as `S-`
 
 ### Control Meta `C-M-`
 
 - Same limitations as under `C-`
-- Case is ignored: Binding `C-M-A` after `C-M-a` will override `C-M-a`, so
-  only lowercase is bound.
 
 ### Control Meta Shift `C-M-S-`
 
 - Same limitations as under `C-`
-- No lowercase keys are bound due to the use of Shift.
 
 ## Additional Information
 
