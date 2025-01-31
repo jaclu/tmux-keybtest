@@ -5,14 +5,48 @@
 #
 #   Part of https://github.com/jaclu/tmux-keybtest
 #
-
-#
-#  This will generate a tmux.conf adjusted to the used tmux version
+#  This will generate a tmux.conf adjusted to the version of tmux being used
 #
 
+#---------------------------------------------------------------
+#
+#  Write to $tmux_conf
+#
+#---------------------------------------------------------------
 writeln() {
     printf "%s\n" "$1" >>"$tmux_conf"
 }
+
+bind_char() {
+    local output="bind -n "
+
+    [[ -z "$1" ]] && {
+        echo "ERROR: call to bind_char() with no param"
+        exit 1
+    }
+    if [[ -n "$skip_message" ]]; then
+        output="# ${mod}$1  -  ## $skip_message"
+    else
+        case "$2" in
+        s | S) output+="'${mod}$1' display-message '${mod}$1'" ;;
+        d | D) output+="\"${mod}$1\" display-message \"${mod}$1\"" ;;
+        *) output+="${mod}$1 display-message \"${mod}$1\"" ;;
+        esac
+    fi
+    writeln "$output"
+}
+
+# # Not used ATM
+# bind_mouse_script() {
+#     local output="bind -n "
+
+#     [[ -z "$1" ]] && {
+#         echo "ERROR: call to bind_run() with no param"
+#         exit 1
+#     }
+#     output+="'${mod}$1' run-shell -b '$f_mouse_event ${mod}$1'"
+#     writeln "$output"
+# }
 
 header_1() {
     writeln
@@ -36,152 +70,147 @@ header_3() {
     writeln "#  --  $1"
 }
 
-bind_char() {
-    local output="bind -n "
+#---------------------------------------------------------------
+#
+#  Handle stack of override messages
+#
+#---------------------------------------------------------------
+push_skip_message() {
+    local msg="$1"
 
-    [[ -z "$1" ]] && {
-        echo "ERROR: call to bind_char() with no param"
-        exit 1
-    }
-    case "$2" in
-    s | S) output+="'${mod}$1' display-message '${mod}$1'" ;;
-    d | D) output+="\"${mod}$1\" display-message \"${mod}$1\"" ;;
-    *) output+="${mod}$1 display-message \"${mod}$1\"" ;;
-    esac
-    writeln "$output"
+    skip_message_stack+=("$msg") # Push onto stack
+    skip_message="$msg"          # Set skip_message
 }
 
-bind_mouse_event() {
-    local output="bind -n "
+pop_skip_message() {
+    local len=${#skip_message_stack[@]}
 
-    [[ -z "$1" ]] && {
-        echo "ERROR: call to bind_run() with no param"
-        exit 1
-    }
-    output+="'${mod}$1' run-shell -b '$f_mouse_event ${mod}$1'"
-    writeln "$output"
+    if [[ "$len" -gt 0 ]]; then
+        unset "skip_message_stack[$((len - 1))]"        # Remove last element
+        skip_message_stack=("${skip_message_stack[@]}") # Rebuild array to avoid gaps
+    fi
 
+    # Reset skip_message only once using array length check
+    if [[ "${#skip_message_stack[@]}" -gt 0 ]]; then
+        skip_message="${skip_message_stack[$((${#skip_message_stack[@]} - 1))]}"
+    else
+        skip_message="" # If stack is empty, reset skip_message
+    fi
 }
 
-base_conf() {
-    #region base config
+clear_skip_mesages_stack() {
+    skip_message_stack=() # Clear the stack
+    skip_message=""       # Reset skip_message to empty
+}
+
+#---------------------------------------------------------------
+#
+#  Define core tmux environment
+#
+#---------------------------------------------------------------
+
+base_config() {
+    if tmux_vers_ok 3.0; then
+        unlimited=0
+    else
+        unlimited=999
+    fi
+
+    writeln "#==========================================================="
+    writeln "#"
+    writeln "#  Tmux conf for teting keyboard implementation, and what"
+    writeln "#  non standard sequences it can generate. - Arrows with modifiers etc"
     # shellcheck disable=SC2154
-    writeln "#===========================================================
-#
-#  Tmux conf for teting keyboard implementation, and what
-#  non standard sequences it can generate. - Arrows with modifiers etc
-# Created for tmux version: $tpt_current_vers
-#   int:    $tpt_current_vers_i
-#   suffix: $tpt_current_vers_suffix
-#
-#===========================================================
+    writeln "# Created for tmux version: $tpt_current_vers"
+    writeln "#"
+    writeln "#==========================================================="
+    writeln "#"
+    writeln "#  Base config"
+    writeln "#"
+    writeln "set-option -g prefix C-x"
+    writeln "bind C-c kill-server"
+    writeln "set-option -s escape-time 100"
+    writeln "set-option -g display-time 1000"
+    writeln "set-option -g monitor-activity off"
+    writeln "set-option -g visual-bell on"
+    # writeln "set-option -g focus-events on"
+    # to hopefully avoid filling the screen with a fancy prompt, use a minimal shell
+    writeln "set-option -g default-command '/bin/sh'"
 
-#
-#  Base config
-#
-set-option -g prefix C-x
-bind C-c kill-server
-set-option -s escape-time 100
-set-option -g display-time 1000
-set-option -g monitor-activity off
-set-option -g visual-bell on
-set-option -g focus-events on"
-    #endregion
-    tmux_vers_ok 2.4 && writeln "set-option -g monitor-bell off"
-    tmux_vers_ok 2.1 && writeln "set-option -g mouse on"
+    tmux_vers_ok 2.6 && writeln "set-option -g monitor-bell off"
     tmux_vers_ok 2.8 && writeln "bind Any display 'This key is not bound to any action'"
-    tmux_vers_ok 3.2 && writeln "set-option -g extended-keys on"
-
-    #region Display current tmux vers in Status bar left
-    writeln "
-#
-# Display currently used tmux version in Status bar left
-#
-set-option -g status-left-length 20
-set-option -g status-left 'tmux version:#[fg=white,bg=black]$tpt_current_vers#[default] '
-"
-    #endregion
-
-    #region Display prefix key pressed in Status bar right
-    writeln "
-#
-# Display prefix key pressed in Status bar right
-#
-set-option -g status-right-length 0
-set-option -g status-right '#{?client_prefix,Prefix #[fg=colour231]#[bg=colour04]C-x#[default] - Press C-c to exit,}'
-# run-shell -b 'sleep 0.5 ; tmux send-keys \"showkey -a\" C-M'
-set-option -g default-command '/bin/sh'
-"
-    #endregion
-
-    tmux_vers_ok 2.9 && {
-        _line_1="Displays keys and mouse events recognized by tmux in status-bar"
-        #region Display some hints in status bar left row 2 & 3
-        writeln "
-#
-#  Display some hints in status bar left row 2 & 3
-#
-set-option -g status 3
-set-option -g status-format[1] '$_line_1'
-set-option -g status-format[2] 'To exit press C-x then C-c. To test C-x press it twice'"
-        #endregion
+    tmux_vers_ok 3.2 && {
+        writeln "set-option -g extended-keys on"
+        writeln "set -g -a terminal-features '*:extkeys'"
     }
-
-    #     tmux_vers_ok 3.0 && {
-    #         #region unbind default popup menus
-    #         writeln "
-    # #======================================================
-    # #
-    # #   Remove unwanted default popup menus
-    # #
-    # #======================================================
-    # unbind  -n  MouseDown3Pane
-    # unbind  -n  MouseDown3Status
-    # unbind  -n  MouseDown3StatusLeft
-    # unbind  -n  M-MouseDown3Pane"
-    #         #endregion
-    #     }
-    #     ! tmux_vers_ok 3.1 && writeln "unbind  -n  MouseDown3StatusRight"
-    #     tmux_vers_ok "3.0a" && {
-    #         writeln "unbind  <"
-    #         writeln "unbind  >"
-    #     }
-    #     tmux_vers_ok 3.4 && {
-    #         writeln "unbind  -n  M-MouseDown3Status"
-    #         writeln "unbind  -n  M-MouseDown3StatusLeft"
-    #     }
+    if command -v showkey >/dev/null; then
+        cmd="showkey -a" # this is used to display keys tmux did not capure"
+    else
+        cmd="cat"
+    fi
+    keys="'$cmd # this is used to display keys tmux did not capure'"
+    writeln "run-shell -b \"sleep 0.1 ; tmux send-keys $keys C-M\""
 }
 
-mouse_event_via_script() {
-    # Doesn't work right now, using mouse_events() instead
+define_status_bar() {
+    local prefix_color=" #[fg=colour231]#[bg=colour04]"
+    # local prefix_pressed="Prefix ${prefix_color}C-x#[default] - Press C-c to exit"
+    local prefix_pressed="Got C-x - Next Press ${prefix_color}C-c#[default] to exit"
+    local exit_procedure="To exit press C-x then C-c."
+    local serv_vers_info="tmux version:#[fg=green,bg=black] $tpt_current_vers #[default]"
+    local line_1="Displays recognized un-prefixed keys"
 
-    header_2 "Mouse via script"
-    bind_mouse_event WheelUpPane
-    bind_mouse_event WheelDownPane
-    bind_mouse_event MouseDown1Pane
-    bind_mouse_event MouseUp1Pane
-    bind_mouse_event MouseDrag1Pane
-    bind_mouse_event MouseDragEnd1Pane
-    bind_mouse_event MouseDown2Pan
-    bind_mouse_event MouseUp2Pane
-    bind_mouse_event MouseDrag2Pane
-    bind_mouse_event MouseDragEnd2Pane
-    bind_mouse_event MouseDown3Pane
-    bind_mouse_event MouseUp3Pane
-    bind_mouse_event MouseDrag3Pane
-    bind_mouse_event MouseDragEnd3Pane
-    bind_mouse_event SecondClick1Pane
-    bind_mouse_event SecondClick2Pane
-    bind_mouse_event SecondClick3Pane
-    bind_mouse_event DoubleClick1Pane
-    bind_mouse_event DoubleClick2Pane
-    bind_mouse_event DoubleClick3Pane
-    bind_mouse_event TripleClick1Pane
-    bind_mouse_event TripleClick2Pane
-    bind_mouse_event TripleClick3Pane
+    $use_mouse && line_1+=" and mouse events"
+    if tmux_vers_ok 2.9; then
+        #
+        # Use line 2 & 3 for general info
+        #
+
+        writeln
+        writeln "#"
+        writeln "#  Display some hints in status bar left row 2 & 3"
+        writeln "#"
+        writeln "set-option -g status 3"
+        writeln "set-option -g status-format[1] '$line_1'"
+        writeln "set-option -g status-format[2] '$exit_procedure'"
+        writeln "set-option -g status-left-length $unlimited"
+        writeln "# set-option -g window-status-format ''"
+        writeln "set-option -g window-status-current-format ''"
+        writeln "set-option -g status-left ''" # Clear it to suppress ses name from showing
+    else
+        #
+        # For older version only one line is available
+        #
+        writeln
+        writeln "#"
+        writeln "# Display exit hint in Status bar left"
+        writeln "#"
+        writeln "set-option -g status-justify left"
+        writeln "set-option -g status-left-length $unlimited"
+        writeln "set-option -g window-status-format ''"
+        writeln "set-option -g window-status-current-format ''"
+        writeln "set-option -g status-left '$exit_procedure This displays recognized keys'"
+    fi
+
+    writeln
+    writeln "#"
+    writeln "# Display currently used tmux version & prefix key pressed in Status bar right"
+    writeln "#"
+    writeln "set-option -g status-right '#{?client_prefix,$prefix_pressed,$serv_vers_info}'"
 }
 
-mouse_event_loop() {
+setup_tmux_server() {
+    base_config
+    define_status_bar
+}
+
+#---------------------------------------------------------------
+#
+#  Display various inputs
+#
+#---------------------------------------------------------------
+
+mouse_handling() {
     local old_ifs="$IFS"
     local events_123=(
         MouseDown
@@ -201,11 +230,6 @@ mouse_event_loop() {
     )
     local event button location
 
-    tmux_vers_ok 3.2 && {
-        events_123+=(
-            SecondClick
-        )
-    }
     tmux_vers_ok 2.4 && {
         events_123+=(
             DoubleClick
@@ -219,94 +243,48 @@ mouse_event_loop() {
             StatusDefault
         )
     }
-
     tmux_vers_ok 3.2 && {
         events_123+=(
             SecondClick
         )
     }
+    writeln
+    writeln
+    writeln "#==========================================================="
+    writeln "#"
+    writeln "#  Mouse handling"
+    writeln "#"
+    writeln "#==========================================================="
+    writeln "set-option -g mouse on"
+    writeln
     old_ifs="$IFS"
     IFS=$'\n'
-    for event in "${events_123[@]}"; do
-        for button in "${buttons[@]}"; do
-            for location in "${locations[@]}"; do
-                # bind_mouse_event "${event}${button}${location}"
-                bind_char "${event}${button}${location}" d
+    for location in "${locations[@]}"; do
+        for event in "${events_123[@]}"; do
+            for button in "${buttons[@]}"; do
+                # bind_mouse_script "${event}${button}${location}"
+                bind_char "${event}${button}${location}" s
             done
         done
+        # Obly loop over location for Wheel events
+        bind_char "WheelUp$location"
+        bind_char "WheelDown$location"
     done
-
     IFS="$old_ifs"
 }
 
-# mouse_events_new() {
-#     # mouse suffixes
-#     mouse_wheel="WheelUp WheelDown"
-#     # for all mouse events
-#     location_suffixes="Border/Status/StatusLeft/StatusRight"
-
-#     # old_ifs=""$IFS""
-#     # IFS=""$separator""
-
-#     # for item in $items; do
-#     #     [[ -z ""$item"" ]] && continue
-#     #     log_it " item: "$item""
-#     #     case ""$item"" in
-#     #     */*) loop_over_sub_items ""$item"" ;;
-#     #     *)
-#     #         is_it_available ""$item"" || add_missing_dependeny ""$item""
-#     #         ;;
-#     #     esac
-#     # done
-
-#     # IFS=""$old_ifs""
-# }
-
-# mouse_events() {
-#     header_2 "Mouse"
-#     #region Mouse
-#     bind_char WheelUpPane d
-#     bind_char WheelDownPane d
-#     bind_char MouseDown1Pane d
-#     bind_char MouseUp1Pane d
-#     bind_char MouseDrag1Pane d
-#     bind_char MouseDragEnd1Pane d
-#     bind_char MouseDown2Pane d
-#     bind_char MouseUp2Pane d
-#     bind_char MouseDrag2Pane d
-#     bind_char MouseDragEnd2Pane d
-#     bind_char MouseDown3Pane d
-#     bind_char MouseUp3Pane d
-#     bind_char MouseDrag3Pane d
-#     bind_char MouseDragEnd3Pane d
-#     bind_char DoubleClick1Pane d
-#     bind_char DoubleClick2Pane d
-#     bind_char DoubleClick3Pane d
-#     bind_char TripleClick1Pane d
-#     bind_char TripleClick2Pane d
-#     bind_char TripleClick3Pane d
-
-#     tmux_vers_ok 3.2 || return
-
-#     bind_char SecondClick1Pane d
-#     bind_char SecondClick2Pane d
-#     bind_char SecondClick3Pane d
-# }
-
 lower_case_chars() {
+    clear_skip_mesages_stack
+    header_3 "Lower Case"
 
     case "$mod" in
     S- | C-S- | M-S- | C-M-S-)
-        if ! tmux_vers_ok 3.5; then
-            writeln
-            writeln "# Prior to 3.5 C- C-M- i & m overrides tab and Enter"
-            writeln
-            return
-        fi
+        writeln "# $mod  - should be handled in Upper Case section"
+        return
         ;;
     *) ;;
     esac
-    header_3 "Lower Case"
+
     bind_char a
     bind_char b
     bind_char c
@@ -316,42 +294,41 @@ lower_case_chars() {
     bind_char g
     bind_char h
 
-    # Messes with Escaoe & Enter on older versions
     case "$mod" in
     C- | C-M-)
         if tmux_vers_ok 3.5; then
-            writeln
-            writeln "# Grouped, since they are handled by the same special case"
             bind_char i
-            bind_char m
-            writeln
         else
-            writeln
-            writeln "# Prior to 3.5 C- C-M- i & m overrides tab and Enter"
-            writeln
+            writeln "# Prior to 3.5 ${mod}i overrides Tab"
         fi
         ;;
-    *)
-        writeln
-        writeln "# Grouped, since they are handled by the same special case"
-        bind_char i
-        bind_char m
-        writeln
-        ;;
+    *) bind_char i ;;
     esac
 
     bind_char j
     bind_char k
-    bind_char l d
+    bind_char l
+
+    case "$mod" in
+    C- | C-M-)
+        if tmux_vers_ok 3.5; then
+            bind_char m
+        else
+            writeln "# Prior to 3.5 ${mod}m overrides Enter"
+        fi
+        ;;
+    *) bind_char m ;;
+    esac
+
     bind_char n
     bind_char o
-    bind_char p d
+    bind_char p
     bind_char q
     bind_char r
-    bind_char s d
+    bind_char s
     bind_char t
     bind_char u
-    bind_char v d
+    bind_char v
     bind_char w
 
     case "$mod" in
@@ -365,35 +342,32 @@ lower_case_chars() {
 
     bind_char y
     bind_char z
-    tmux_vers_ok 2.2 && {
-        bind_char å
-        bind_char ä
-        bind_char ö
 
-        header_3 "acute accent"
-        bind_char á
-        bind_char é
-        bind_char í
-        bind_char ó
-        bind_char ú
-        bind_char ý
-    }
+    ! tmux_vers_ok 2.2 && push_skip_message "Accents & umlauts can't be bound before 2.2"
+    bind_char å
+    bind_char ä
+    bind_char ö
+
+    header_3 "acute accent"
+    bind_char á
+    bind_char é
+    bind_char í
+    bind_char ó
+    bind_char ú
+    bind_char ý
 }
 
 upper_case_chars() {
-
+    clear_skip_mesages_stack
     case "$mod" in
     C- | C-M-)
         if ! tmux_vers_ok 3.2; then
-            writeln
-            writeln "# Prior to 3.2 Uppercase Ctrl is ignored by tmux"
-            writeln
-            return
+            push_skip_message "Prior to 3.2 ${mod}-Uppercase overrides ${mod}-Lowercase"
         elif ! tmux_vers_ok 3.5a; then
             #region Blurb about using C-S-A instead of C-A
             writeln "
 #
-#  Pior to 3.5a tmux didn't handle C-uppercase properly.
+#  Versions 3.2 - 3.4 didn't handle C-uppercase properly.
 #  I will use a/A to make the samples easier to write but is the same for all uppercases.
 #
 #  Any action bound to C-A will be associated with C-a, overwriting anything already
@@ -424,61 +398,72 @@ upper_case_chars() {
     bind_char G
     bind_char H
 
-    # Messes with Escaoe & Enter on older versions
     case "$mod" in
     C- | C-M-)
-        if tmux_vers_ok 3.5; then
-            bind_char I
-            bind_char M
-        else
-            writeln
-            writeln "# Prior to 3.5 C- C-M- I & M overrides tab and Enter"
-            writeln '~ $ % & * { } | " '
-            writeln
-        fi
+        tmux_vers_ok 3.5 || {
+            push_skip_message "Prior to 3.5 this overrides ${mod}Tab"
+        }
         ;;
     *) ;;
     esac
+    bind_char I
+    pop_skip_message
 
     bind_char J
     bind_char K
     bind_char L
+
+    case "$mod" in
+    C- | C-M-)
+        tmux_vers_ok 3.5 || {
+            push_skip_message "Prior to 3.5 this overrides ${mod}Enter"
+        }
+        ;;
+    *) ;;
+    esac
+    bind_char M
+    pop_skip_message
+
     bind_char N
     bind_char O
-    bind_char P d
+    bind_char P
     bind_char Q
     bind_char R
-    bind_char S d
+    bind_char S
     bind_char T
     bind_char U
-    bind_char V d
+    bind_char V
     bind_char W
     bind_char X
     bind_char Y
     bind_char Z
-    if tmux_vers_ok 2.2; then
-        bind_char Å
-        bind_char Ä
-        bind_char Ö
 
-        header_3 "acute accent"
-        bind_char Á
-        bind_char É
-        bind_char Í
-        bind_char Ó
-        bind_char Ú
-        bind_char Ý
-    else
-        writeln
-        writeln "# Prior to 2.2 Umlaut & accented characters can't be bound"
-        writeln "# Such as: Å Ä Ö Á É Ý ..."
-        writeln
-    fi
+    ! tmux_vers_ok 2.2 && push_skip_message "Accents & umlauts can't be bound before 2.2"
+    bind_char Å
+    bind_char Ä
+    bind_char Ö
+
+    header_3 "acute accent"
+    bind_char Á
+    bind_char É
+    bind_char Í
+    bind_char Ó
+    bind_char Ú
+    bind_char Ý
 }
 
 non_letter_regular_cars() {
-
+    clear_skip_mesages_stack
     header_3 "non-letter regular keys"
+
+    case "$mod" in
+    S- | C-S- | M-S- | C-M-S-)
+        writeln "# $mod  - These dont differ between upper/lower case"
+        return
+        ;;
+    *) ;;
+    esac
+
     bind_char "1"
     bind_char "2"
     bind_char "3"
@@ -489,14 +474,16 @@ non_letter_regular_cars() {
     bind_char "8"
     bind_char "9"
     bind_char "0"
-    tmux_vers_ok 2.2 && {
-        bind_char §
-        bind_char ± # plus-minus sign
-        bind_char ° # degree symbol
-        bind_char £
-        bind_char €
-        bind_char "´"
-    }
+
+    ! tmux_vers_ok 2.2 && push_skip_message "Not handled before 2.2"
+    bind_char §
+    bind_char ± # plus-minus sign
+    bind_char ° # degree symbol
+    bind_char £
+    bind_char €
+    bind_char "´"
+    pop_skip_message
+
     bind_char "!"
     bind_char "@"
     bind_char '#' s
@@ -510,16 +497,14 @@ non_letter_regular_cars() {
 
     case "$mod" in
     C- | C-M-)
-        if tmux_vers_ok 3.5; then
-            bind_char "["
-        else
-            writeln
-            writeln "# Prior to 3.5 [ can not be bound with C- C-M- would override Escape"
-            writeln
-        fi
+        tmux_vers_ok 3.5 || {
+            push_skip_message "Prior to 3.5 this overrides ${mod}Escape"
+        }
         ;;
-    *) bind_char "[" ;;
+    *) ;;
     esac
+    bind_char "["
+    pop_skip_message
 
     bind_char "]"
     bind_char "\\\\" d
@@ -535,7 +520,7 @@ non_letter_regular_cars() {
 
     tmux_vers_ok 3.3 || {
         case "$mod" in
-        "C-" | "C-M-") return ;;
+        "C-" | "C-M-") push_skip_message "Not handled before 3.3" ;;
         *) ;;
         esac
     }
@@ -544,13 +529,7 @@ non_letter_regular_cars() {
 
     tmux_vers_ok 3.5 || {
         case "$mod" in
-        C- | C-M-)
-            writeln
-            writeln "# Prior to 3.5 theese are not possible to bind with C- C-M-:"
-            writeln '~ $ % & * { } | " '
-            writeln
-            return
-            ;;
+        C- | C-M-) push_skip_message "Not handled before 3.5" ;;
         *) ;;
         esac
     }
@@ -566,6 +545,7 @@ non_letter_regular_cars() {
 }
 
 special_basic_keys() {
+    clear_skip_mesages_stack
     header_2 "Special basic keys"
     bind_char Tab
     bind_char bTab
@@ -577,13 +557,10 @@ special_basic_keys() {
     bind_char Left
     bind_char Right
 
-    tmux_vers_ok 3.3 || {
+    tmux_vers_ok 3.1 || {
         case "$mod" in
         C- | C-S- | C-M- | C-M-S-)
-            writeln
-            writeln "# Prior to 3.3 it is not possible to bind Escape with C- C-S- C-M- C-M-S-:"
-            writeln
-            return
+            push_skip_message "Not handled before 3.2"
             ;;
         *) ;;
         esac
@@ -592,6 +569,7 @@ special_basic_keys() {
 }
 
 func_keys() {
+    clear_skip_mesages_stack
     header_2 "Function keys"
     bind_char F1
     bind_char F2
@@ -608,6 +586,7 @@ func_keys() {
 }
 
 above_arrows() {
+    clear_skip_mesages_stack
     header_2 "Group normally above arrows"
     bind_char IC # Insert
     bind_char DC # Delete
@@ -618,6 +597,7 @@ above_arrows() {
 }
 
 num_keyboard() {
+    clear_skip_mesages_stack
     header_2 "Num Keyboard"
     bind_char KP/
     bind_char "KP*" d
@@ -639,35 +619,9 @@ num_keyboard() {
 
 regular_chars() {
     header_2 "Regular keys"
-    case "$mod" in
-    S-)
-        writeln
-        writeln "# It is not meaningfull to bind loswercase with S-"
-        writeln
-        return
-        ;; # none in this group can be bound to S-
-    C-S- | ˚¡M-S- | C-M-S-) ;;
-    *)
-        lower_case_chars
-        non_letter_regular_cars
-        ;;
-    esac
-
+    lower_case_chars
     upper_case_chars
-}
-
-do_keys() {
-    # tmux_vers_ok 2.1 && {
-    #     mouse_event_loop
-    #     # mouse_event_via_script
-    #     # mouse_events
-    #     :
-    # }
-    regular_chars
-    # special_basic_keys
-    # func_keys
-    # above_arrows
-    # num_keyboard
+    non_letter_regular_cars
 }
 
 process_mod() {
@@ -685,8 +639,12 @@ process_mod() {
     esac
 
     header_1 "$mod_long"
-
-    do_keys
+    regular_chars
+    special_basic_keys
+    func_keys
+    above_arrows
+    num_keyboard
+    $use_mouse && tmux_vers_ok "$mouse_min_level" && mouse_handling
 }
 
 #===============================================================
@@ -697,20 +655,28 @@ process_mod() {
 
 d_tkbtst_location="$(dirname "$(realpath "$0")")"
 
+# Stack to store messages
+declare -a skip_message_stack=()
+skip_message=""
+
+use_mouse=false
+mouse_min_level="2.1"
+
 # shellcheck source=utils.sh
 . "$d_tkbtst_location"/utils.sh
 
-# tmux_vers_ok 2.4 || {
-#     echo
-#     echo "ERROR: This requires tmux >= 2.4!"
-#     echo
-#     exit 1
-# }
+[[ "$1" = "-m" ]] && {
+    tmux_vers_ok "$mouse_min_level" || {
+        echo "ERROR: mouse can't be used in this app prior to tmux 2.1"
+        exit 1
+    }
+    use_mouse=true
+}
 
 rm -f "$tmux_conf"
 tpt_retrieve_running_tmux_vers
 
-base_conf
+setup_tmux_server
 process_mod ""
 process_mod "S-"
 process_mod "C-"
@@ -719,3 +685,5 @@ process_mod "M-"
 process_mod "M-S-"
 process_mod "C-M-"
 process_mod "C-M-S-"
+
+exit 0

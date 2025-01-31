@@ -1,8 +1,14 @@
 #!/bin/sh
-
+#
+#   Copyright (c) 2024-2025: Jacob.Lundqvist@gmail.com
+#   License: MIT
+#
+#   Checks running tmux version and can do dependency checks, the latter part
+#   is mostly for tmux-plugins etc
 #
 # To make this safer to include in other code, functions and variables
 # believed to be of use outside this are prefixed with tpt_
+# except for tmux_vers_ok
 # all other variables use _ prefix to clearly list them as temporary.
 # This should ensure this will not collide with any other namespaces.
 #

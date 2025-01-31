@@ -1,5 +1,11 @@
 #!/bin/sh
-
+#
+#   Copyright (c) 2025: Jacob.Lundqvist@gmail.com
+#   License: MIT
+#
+#   Part of https://github.com/jaclu/tmux-keybtest
+#
+#   Tests
 vers_check() {
     v_test="$1"
     if tmux_vers_ok "$v_test"; then
@@ -50,10 +56,10 @@ test_dependencies() {
     dep_check "bash zsh fzf|sk"
 }
 
-this_location="$(dirname "$(realpath "$0")")"
+d_tkbtst_location="$(dirname "$(dirname "$(realpath "$0")")")"
 
 # shellcheck source=tmux-plugin-tools.sh
-. "$this_location"/tmux-plugin-tools.sh
+. "$d_tkbtst_location"/tmux-plugin-tools.sh
 
 tpt_define_plugin_env
 tpt_retrieve_running_tmux_vers
