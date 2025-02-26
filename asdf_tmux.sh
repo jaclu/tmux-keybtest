@@ -5,8 +5,6 @@
 #
 #   Part of https://github.com/jaclu/tmux-keybtest
 #
-
-#
 #  1. Set tmux version
 #  2. generate a matching tmux.conf
 #  3. run keybtest.sh
@@ -26,4 +24,4 @@ source "$d_tkbtst_location"/utils.sh
 #
 cd "$d_tkbtst_location" || exit 1
 
-asdf local tmux "$1" && ./generate_tmux_conf.sh && ./keybtest.sh
+asdf local tmux "$1" && ./keybtest.sh

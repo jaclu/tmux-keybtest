@@ -5,16 +5,8 @@
 #
 #   Part of https://github.com/jaclu/tmux-keybtest
 #
-
-cleanup_tmp_files() {
-    rm -f "$f_mouse_status" "$f_mouse_display_timer"
-}
-
-#===============================================================
+#   Common utils
 #
-#   Main
-#
-#===============================================================
 
 [[ -z "$d_tkbtst_location" ]] && {
     echo "ERROR: d_tkbtst_location undefined in: $0"
@@ -29,7 +21,10 @@ else
     [[ -z "$TMUX_BIN" ]] && TMUX_BIN="tmux"
 fi
 
-# shellcheck source=./tmux-plugin-tools.sh
+#
+#  provides tmux_vers_ok
+#
+# shellcheck source=/dev/null
 source "$d_tkbtst_location"/tmux-plugin-tools.sh
 
 #
@@ -38,11 +33,9 @@ source "$d_tkbtst_location"/tmux-plugin-tools.sh
 # shellcheck disable=SC2034
 tmux_conf="$d_tkbtst_location"/keybtest.conf
 
-# location for socet files
-d_tmp="${TMPDIR:-/tmp}"
+#
+#  Mouse event helper
+#
 
-# shellcheck disable=SC2154
-socket_name="$(basename "$(echo "$TMUX" | cut -d, -f 1)")"
-
-f_mouse_status="$d_tmp/tmux-keybtest-$socket_name-mouse-status"
-f_mouse_display_timer="$d_tmp/tmux-keybtest-$socket_name-display_timer"
+# shellcheck disable=SC2034
+f_mouse_event="$d_tkbtst_location"/tools/mouse_event.sh
