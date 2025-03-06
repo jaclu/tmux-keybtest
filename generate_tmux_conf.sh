@@ -148,7 +148,7 @@ base_config() {
     # to hopefully avoid filling the screen with a fancy prompt, use a minimal shell
     writeln "set-option -g default-command '/bin/sh'"
 
-    $use_mouse && tmux_vers_ok "$mouse_min_level" && writeln "set-option -g mouse on"
+    $use_mouse && tmux_vers_ok "$mouse_vers_min" && writeln "set-option -g mouse on"
     tmux_vers_ok 2.6 && writeln "set-option -g monitor-bell off"
     tmux_vers_ok 2.8 && writeln "bind Any display 'This key is not bound to any action'"
     tmux_vers_ok 3.2 && {
@@ -676,7 +676,7 @@ process_mod() {
     func_keys
     above_arrows
     num_keyboard
-    $use_mouse && tmux_vers_ok "$mouse_min_level" && mouse_handling
+    $use_mouse && tmux_vers_ok "$mouse_vers_min" && mouse_handling
 }
 
 #===============================================================
@@ -692,14 +692,14 @@ declare -a skip_message_stack=()
 skip_message=""
 
 use_mouse=false
-mouse_min_level="2.1"
+mouse_vers_min="2.1"
 
 # shellcheck source=utils.sh
 . "$d_tkbtst_location"/utils.sh
 
 [[ "$1" = "-m" ]] && {
-    tmux_vers_ok "$mouse_min_level" || {
-        echo "ERROR: mouse can't be used in this app prior to tmux $mouse_min_level"
+    tmux_vers_ok "$mouse_vers_min" || {
+        echo "ERROR: mouse can't be used in this app prior to tmux $mouse_vers_min"
         exit 1
     }
     use_mouse=true
