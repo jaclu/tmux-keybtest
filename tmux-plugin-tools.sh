@@ -3,6 +3,7 @@
 #   Copyright (c) 2024-2025: Jacob.Lundqvist@gmail.com
 #   License: MIT
 #
+# shellcheck disable=SC2034
 _tpt_release="2025-02-01 v5"
 #
 #   Checks running tmux version and can do dependency checks, the latter part
