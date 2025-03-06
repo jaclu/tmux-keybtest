@@ -148,6 +148,7 @@ base_config() {
     # to hopefully avoid filling the screen with a fancy prompt, use a minimal shell
     writeln "set-option -g default-command '/bin/sh'"
 
+    $use_mouse && tmux_vers_ok "$mouse_min_level" && writeln "set-option -g mouse on"
     tmux_vers_ok 2.6 && writeln "set-option -g monitor-bell off"
     tmux_vers_ok 2.8 && writeln "bind Any display 'This key is not bound to any action'"
     tmux_vers_ok 3.2 && {
@@ -266,7 +267,6 @@ mouse_handling() {
     writeln "#  Mouse handling"
     writeln "#"
     writeln "#==========================================================="
-    writeln "set-option -g mouse on"
     writeln
     old_ifs="$IFS"
     IFS=$'\n'
