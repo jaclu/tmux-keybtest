@@ -13,7 +13,11 @@
 d_tkbtst_location="$(realpath "$(dirname -- "$0")")"
 source "$d_tkbtst_location"/utils.sh
 
-[[ -z "$1" ]] && {
+tmux_vers="$1"
+
+shift # rest of params are sent to keybtest.sh
+
+[[ -z "$tmux_vers" ]] && {
     echo "ERROR: tmux vers must be given as param!"
     exit 1
 }
@@ -24,4 +28,4 @@ source "$d_tkbtst_location"/utils.sh
 #
 cd "$d_tkbtst_location" || exit 1
 
-asdf local tmux "$1" && ./keybtest.sh
+asdf set tmux "$tmux_vers" && ./keybtest.sh "$@"
