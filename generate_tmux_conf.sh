@@ -344,7 +344,7 @@ lower_case_chars() {
 
     case "$mod" in
     C-)
-        # Special case dont bind this to the root table, in order to display prefix
+        # Special case don't bind this to the root table, in order to display prefix
         # on second press
         writeln "bind '${mod}x' display-message '${mod}x'"
         ;;
@@ -477,7 +477,7 @@ non_letter_regular_cars() {
 
     case "$mod" in
     S- | C-S- | M-S- | C-M-S-)
-        writeln "# $mod  - These dont differ between upper/lower case"
+        writeln "# $mod  - These don't differ between upper/lower case"
         return
         ;;
     *) ;;
