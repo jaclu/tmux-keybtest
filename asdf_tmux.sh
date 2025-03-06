@@ -14,9 +14,12 @@ d_tkbtst_location="$(realpath "$(dirname -- "$0")")"
 source "$d_tkbtst_location"/utils.sh
 
 tmux_vers="$1"
-
 shift # rest of params are sent to keybtest.sh
 
+command -v asdf >/dev/null || {
+    echo "ERROR: asdf not available"
+    exit 1
+}
 [[ -z "$tmux_vers" ]] && {
     echo "ERROR: tmux vers must be given as param!"
     exit 1
