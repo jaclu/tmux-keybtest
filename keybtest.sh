@@ -21,6 +21,10 @@ source "$d_tkbtst_location"/utils.sh
     exit 1
 }
 
+echo
+echo "Run with -m to also capture mouse events"
+echo
+
 #
 # use pid of this script to make socket unique. This allows more than one
 # terminal to run this at the same time independently.
