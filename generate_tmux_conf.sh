@@ -140,7 +140,7 @@ base_config() {
     writeln "#"
     writeln "set-option -g prefix C-x"
     writeln "bind C-c kill-server"
-    writeln "set-option -s escape-time 100"
+    writeln "# set-option -s escape-time 100"
     writeln "set-option -g display-time 1000"
     writeln "set-option -g monitor-activity off"
     writeln "set-option -g visual-bell on"
