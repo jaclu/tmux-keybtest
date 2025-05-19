@@ -15,15 +15,15 @@
 d_tkbtst_location="$(dirname "$(realpath "$0")")"
 source "$d_tkbtst_location"/utils.sh
 
+echo
+echo "Run with -m to also capture mouse events"
+echo
+
 # Generate fresh tmux conf, to ensure it matches the installed version
 "$d_tkbtst_location"/generate_tmux_conf.sh "$1" || {
     echo "ERROR: generation of $tmux_conf failed!"
     exit 1
 }
-
-echo
-echo "Run with -m to also capture mouse events"
-echo
 
 #
 # use pid of this script to make socket unique. This allows more than one
