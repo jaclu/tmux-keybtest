@@ -671,7 +671,7 @@ process_mod() {
     esac
 
     echo "Configuring key capture for modifier: $mod_long" >/dev/stderr
-    
+
     header_1 "$mod_long"
     regular_chars
     special_basic_keys
