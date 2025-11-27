@@ -156,11 +156,11 @@ base_config() {
         writeln "set -g -a terminal-features '*:extkeys'"
     }
     if command -v showkey >/dev/null; then
-        cmd="showkey -a" # this is used to display keys tmux did not capure"
+        cmd="showkey -a" # this is used to display keys tmux did not capture - Ignore the Press Ctrl-D to exit on the next line"
     else
         cmd="cat"
     fi
-    keys="'$cmd # this is used to display keys tmux did not capure'"
+    keys="'$cmd # this is used to display keys tmux did not capture - Ignore the Press Ctrl-D to exit on the next line'"
     writeln "run-shell -b \"sleep 0.1 ; tmux send-keys $keys C-M\""
 }
 
