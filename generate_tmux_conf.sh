@@ -139,9 +139,7 @@ base_config() {
     writeln "$opt_s display-time 1000"
     writeln "$opt_w monitor-activity off"
     writeln "$opt_s visual-bell on"
-    # writeln "$opt_s focus-events on"
-    # to hopefully avoid filling the screen with a fancy prompt, use a minimal shell
-    writeln "$opt_s default-command '/bin/sh'"
+    writeln "$opt_s focus-events on"
 
     $use_mouse && tmux_vers_ok "$mouse_vers_min" && writeln "$opt_s mouse on"
     tmux_vers_ok 2.6 && writeln "$opt_s monitor-bell off"
@@ -153,17 +151,16 @@ base_config() {
 
     writeln
     writeln "# Handling of unbound keys"
+    msg="Keys tmux did not capture will be displayed below "
     if tmux_vers_ok 1.5 && command -v showkey >/dev/null; then
-        cmd="showkey -a" # | grep -v 'will terminate this program'"
-        msg="Below keys tmux did not capture will be displayed\n"
-        msg+="The >> will terminate << line below has no meaning in this context"
-        writeln "$run_shell_bg \"sleep 0.2 ; tmux send-keys '$cmd' C-M\""
+        cmd="showkey -a"
+        msg+="using \"showkey -a\""
+        writeln "$opt_s default-command 'echo $msg ; $cmd'"
     else
-        # fallback if no showkey use  no-shell pane
-        msg="Below keys tmux did not capture will be displayed"
+        # fallback if no showkey
+        msg+="without parsing"
         writeln "$opt_s default-command 'echo $msg ; sleep 36000'"
     fi
-
 }
 
 define_status_bar() {
@@ -226,11 +223,11 @@ setup_tmux_server() {
     else
         opt_w="set-window-option -g"
     fi
-    if tmux_vers_ok 1.7; then
-        run_shell_bg="run-shell -b"
-    else
-        run_shell_bg="run-shell"
-    fi
+    # if tmux_vers_ok 1.7; then
+    #     run_shell_bg="run-shell -b"
+    # else
+    #     run_shell_bg="run-shell"
+    # fi
     base_config
     define_status_bar
 }
