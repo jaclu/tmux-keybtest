@@ -609,7 +609,15 @@ special_basic_keys() {
     esac
 
     bind_char bTab
-    bind_char Enter
+
+    case "$mod" in
+        C- | C-S- | C-M- | C-M-S-)
+            if tmux_vers_ok 1.7; then
+                bind_char Enter
+            fi
+            ;;
+        *) bind_char Enter ;;
+    esac
     bind_char Space
     bind_char BSpace
     bind_char Up
