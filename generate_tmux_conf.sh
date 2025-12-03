@@ -44,7 +44,7 @@ bind_char() {
 #         echo "ERROR: call to bind_run() with no param"
 #         exit 1
 #     }
-#     output+="'${mod}$1' run-shell -b '$f_mouse_event ${mod}$1'"
+#     output+="'${mod}$1' $run_shell_bg '$f_mouse_event ${mod}$1'"
 #     writeln "$output"
 # }
 
@@ -121,11 +121,6 @@ clear_skip_mesages_stack() {
 #---------------------------------------------------------------
 
 base_config() {
-    if tmux_vers_ok 3.0; then
-        unlimited=0
-    else
-        unlimited=999
-    fi
 
     writeln "#==========================================================="
     writeln "#"
@@ -138,80 +133,104 @@ base_config() {
     writeln "#"
     writeln "#  Base config"
     writeln "#"
-    writeln "set-option -g prefix C-x"
+    writeln "$opt_s prefix C-x"
     writeln "bind C-c kill-server"
-    writeln "# set-option -s escape-time 100"
-    writeln "set-option -g display-time 1000"
-    writeln "set-option -g monitor-activity off"
-    writeln "set-option -g visual-bell on"
-    # writeln "set-option -g focus-events on"
+    # writeln "set-option -s escape-time 100"
+    writeln "$opt_s display-time 1000"
+    writeln "$opt_w monitor-activity off"
+    writeln "$opt_s visual-bell on"
+    # writeln "$opt_s focus-events on"
     # to hopefully avoid filling the screen with a fancy prompt, use a minimal shell
-    writeln "set-option -g default-command '/bin/sh'"
+    writeln "$opt_s default-command '/bin/sh'"
 
-    $use_mouse && tmux_vers_ok "$mouse_vers_min" && writeln "set-option -g mouse on"
-    tmux_vers_ok 2.6 && writeln "set-option -g monitor-bell off"
+    $use_mouse && tmux_vers_ok "$mouse_vers_min" && writeln "$opt_s mouse on"
+    tmux_vers_ok 2.6 && writeln "$opt_s monitor-bell off"
     tmux_vers_ok 2.8 && writeln "bind Any display 'This key is not bound to any action'"
     tmux_vers_ok 3.2 && {
-        writeln "set-option -g extended-keys on"
+        writeln "$opt_s extended-keys on"
         writeln "set -g -a terminal-features '*:extkeys'"
     }
-    if command -v showkey >/dev/null; then
-        cmd="showkey -a" # this is used to display keys tmux did not capture - Ignore the Press Ctrl-D to exit on the next line"
+
+    writeln
+    writeln "# Handling of unbound keys"
+    if tmux_vers_ok 1.5 && command -v showkey >/dev/null; then
+        cmd="showkey -a" # | grep -v 'will terminate this program'"
+        msg="Below keys tmux did not capture will be displayed\n"
+        msg+="The >> will terminate << line below has no meaning in this context"
+        writeln "$run_shell_bg \"sleep 0.2 ; tmux send-keys '$cmd' C-M\""
     else
-        cmd="cat"
+        # fallback if no showkey use  no-shell pane
+        msg="Below keys tmux did not capture will be displayed"
+        writeln "$opt_s default-command 'echo $msg ; sleep 36000'"
     fi
-    keys="'$cmd # this is used to display keys tmux did not capture - Ignore the Press Ctrl-D to exit on the next line'"
-    writeln "run-shell -b \"sleep 0.1 ; tmux send-keys $keys C-M\""
+
 }
 
 define_status_bar() {
-    local prefix_color=" #[fg=colour231]#[bg=colour04]"
-    # local prefix_pressed="Prefix ${prefix_color}C-x#[default] - Press C-c to exit"
-    local prefix_pressed="Got C-x - Next Press ${prefix_color}C-c#[default] to exit"
-    local exit_procedure="To exit press C-x then C-c."
-    local serv_vers_info="tmux version:#[fg=green,bg=black] $tpt_current_vers #[default]"
     local line_1="Displays recognized un-prefixed keys"
-
     $use_mouse && line_1+=" and mouse events"
+    local exit_procedure="To exit press C-x then C-c."
+
+    if tmux_vers_ok 3.0; then
+        unlimited=0
+    else
+        unlimited=999
+    fi
+    writeln
+    writeln "#"
+    writeln "#  Status bar configuration"
+    writeln "#"
+    writeln "$opt_s status-left-length $unlimited"
+    writeln "$opt_s status-right-length $unlimited"
+
+    writeln
     if tmux_vers_ok 2.9; then
         #
-        # Use line 2 & 3 for general info
+        # Use line 2 for general info
         #
-
-        writeln
-        writeln "#"
-        writeln "#  Display some hints in status bar left row 2 & 3"
-        writeln "#"
-        writeln "set-option -g status 3"
-        writeln "set-option -g status-format[1] '$line_1'"
-        writeln "set-option -g status-format[2] '$exit_procedure'"
-        writeln "set-option -g status-left-length $unlimited"
-        writeln "# set-option -g window-status-format ''"
-        writeln "set-option -g window-status-current-format ''"
-        writeln "set-option -g status-left ''" # Clear it to suppress ses name from showing
+        writeln "#  Display some hints in status bar left row 2"
+        writeln "$opt_s status 2"
+        writeln "$opt_s status-format[1] '$exit_procedure'"
+        writeln "$opt_s window-status-current-format ''"
+        writeln "$opt_s status-left ''" # Clear it to suppress ses name from showing
     else
         #
         # For older version only one line is available
         #
-        writeln
-        writeln "#"
         writeln "# Display exit hint in Status bar left"
-        writeln "#"
-        writeln "set-option -g status-justify left"
-        writeln "set-option -g status-left-length $unlimited"
-        writeln "set-option -g window-status-format ''"
-        writeln "set-option -g window-status-current-format ''"
-        writeln "set-option -g status-left '$exit_procedure This displays recognized keys'"
+        writeln "$opt_s status-justify left"
+        if tmux_vers_ok 1.4; then
+            writeln "$opt_w window-status-format ''"
+            writeln "$opt_w window-status-current-format ''"
+        fi
+        writeln "$opt_s status-left '$exit_procedure This displays recognized keys'"
     fi
 
     writeln
-    writeln "#"
     writeln "# Display currently used tmux version & prefix key pressed in Status bar right"
-    writeln "#"
-    writeln "set-option -g status-right '#{?client_prefix,$prefix_pressed,$serv_vers_info}'"
+    local prefix_color=" #[fg=colour231]#[bg=colour04]"
+    local prefix_pressed="Got C-x - Press ${prefix_color}C-c#[default] to exit"
+
+    local serv_vers_info="tmux version:#[fg=green]#[bg=black] $tpt_current_vers#[default]"
+    if tmux_vers_ok 1.8; then
+        writeln "$opt_s status-right \"#{?client_prefix,$prefix_pressed,$serv_vers_info}\""
+    else
+        writeln "$opt_s status-right \"$serv_vers_info\""
+    fi
 }
 
 setup_tmux_server() {
+    opt_s="set-option -g"
+    if tmux_vers_ok 1.5; then
+        opt_w="set -w -g"
+    else
+        opt_w="set-window-option -g"
+    fi
+    if tmux_vers_ok 1.7; then
+        run_shell_bg="run-shell -b"
+    else
+        run_shell_bg="run-shell"
+    fi
     base_config
     define_status_bar
 }
@@ -483,27 +502,37 @@ non_letter_regular_cars() {
     *) ;;
     esac
 
-    bind_char "1"
-    bind_char "2"
-    bind_char "3"
-    bind_char "4"
-    bind_char "5"
-    bind_char "6"
-    bind_char "7"
-    bind_char "8"
-    bind_char "9"
-    bind_char "0"
+    if [[ "$mod_long" = "Control" ]]; then
+        if tmux_vers_ok 1.7; then
+            bind_char "1"
+            bind_char "2"
+            bind_char "3"
+            bind_char "4"
+            bind_char "5"
+            bind_char "6"
+            bind_char "7"
+            bind_char "8"
+            bind_char "9"
+            bind_char "0"
+            bind_char "!"
+            bind_char '#' s
+            bind_char "("
+            bind_char ")"
+            bind_char "-"
+            bind_char "="
+            bind_char "+"
+            bind_char ":"
+            bind_char "'" d
+            bind_char ","
+            bind_char "."
+            bind_char "<" d
+            bind_char ">" d
+        fi
+    fi
 
-    bind_char "!"
     bind_char "@"
-    bind_char '#' s
     bind_char "^"
-    bind_char "("
-    bind_char ")"
-    bind_char "-"
     bind_char "_"
-    bind_char "="
-    bind_char "+"
 
     case "$mod" in
     C- | C-M-)
@@ -518,12 +547,6 @@ non_letter_regular_cars() {
 
     bind_char "]"
     bind_char "\\\\" d
-    bind_char ":"
-    bind_char "'" d
-    bind_char ","
-    bind_char "."
-    bind_char "<" d
-    bind_char ">" d
     bind_char "?" d
 
     if tmux_vers_ok 3.0; then
@@ -570,7 +593,21 @@ non_letter_regular_cars() {
 special_basic_keys() {
     clear_skip_mesages_stack
     header_2 "Special basic keys"
-    bind_char Tab
+
+    case "$mod" in
+        C- | C-S- | C-M- | C-M-S-)
+            if tmux_vers_ok 1.7; then
+                bind_char Tab
+            fi
+            ;;
+        S-)
+            if tmux_vers_ok 1.4; then
+                bind_char Tab
+            fi
+            ;;
+        *) bind_char Tab ;;
+    esac
+
     bind_char bTab
     bind_char Enter
     bind_char Space
@@ -624,8 +661,13 @@ above_arrows() {
     bind_char DC # Delete
     bind_char Home
     bind_char End
-    bind_char PgUp
-    bind_char PgDn
+    if tmux_vers_ok 1.6; then
+        bind_char PgUp
+        bind_char PgDn
+    else
+        bind_char PPage
+        bind_char NPage
+    fi
 }
 
 num_keyboard() {
