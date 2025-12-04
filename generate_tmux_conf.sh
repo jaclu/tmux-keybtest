@@ -18,6 +18,10 @@ writeln() {
 }
 
 bind_char() {
+    # second param indicates how char should be wrapped
+    # bind_char "1"        bind -n 1 display-message "1"
+    # bind_char '"' s      bind -n '"' display-message '"'
+    # bind_char "|" d      bind -n "|" display-message "|"
     local output="bind -n "
 
     [[ -z "$1" ]] && {
@@ -499,33 +503,34 @@ non_letter_regular_cars() {
     *) ;;
     esac
 
-    if [[ "$mod_long" = "Control" ]]; then
-        if tmux_vers_ok 1.7; then
-            bind_char "1"
-            bind_char "2"
-            bind_char "3"
-            bind_char "4"
-            bind_char "5"
-            bind_char "6"
-            bind_char "7"
-            bind_char "8"
-            bind_char "9"
-            bind_char "0"
-            bind_char "!"
-            bind_char '#' s
-            bind_char "("
-            bind_char ")"
-            bind_char "-"
-            bind_char "="
-            bind_char "+"
-            bind_char ":"
-            bind_char "'" d
-            bind_char ","
-            bind_char "."
-            bind_char "<" d
-            bind_char ">" d
-        fi
-    fi
+    # if [[ "$mod_long" = "Control" ]]; then
+    #    if tmux_vers_ok 1.7; then
+
+    bind_char "1"
+    bind_char "2"
+    bind_char "3"
+    bind_char "4"
+    bind_char "5"
+    bind_char "6"
+    bind_char "7"
+    bind_char "8"
+    bind_char "9"
+    bind_char "0"
+    bind_char "!"
+    bind_char '#' s
+    bind_char "("
+    bind_char ")"
+    bind_char "-"
+    bind_char "="
+    bind_char "+"
+    bind_char ":"
+    bind_char "'" d
+    bind_char ","
+    bind_char "."
+    bind_char "<" d
+    bind_char ">" d
+    #     fi
+    # fi
 
     bind_char "@"
     bind_char "^"
