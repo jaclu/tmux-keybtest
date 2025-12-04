@@ -22,21 +22,62 @@ bind_char() {
     # bind_char "1"        bind -n 1 display-message "1"
     # bind_char '"' s      bind -n '"' display-message '"'
     # bind_char "|" d      bind -n "|" display-message "|"
+    # bind_char ";" db     bind -n "\;" display-message "\\;"
+    local key="$1"
+    local handling="$2"
     local output="bind -n "
 
-    [[ -z "$1" ]] && {
+    [[ -z "$key" ]] && {
         echo "ERROR: call to bind_char() with no param"
         exit 1
     }
     if [[ -n "$skip_message" ]]; then
-        output="# ${mod}$1  -  ## $skip_message"
-    else
-        case "$2" in
-        s | S) output+="'${mod}$1' display-message '${mod}$1'" ;;
-        d | D) output+="\"${mod}$1\" display-message \"${mod}$1\"" ;;
-        *) output+="${mod}$1 display-message \"${mod}$1\"" ;;
+        output="# ${mod}$key  -  ## $skip_message"
+        writeln "$output"
+        return
+    fi
+
+    if [[ "$no_shift" = 1 ]]; then
+        # Indicate this key does not have a shift variant
+        case "$mod" in
+            S- | C-S- | M-S- | C-M-S-)
+                writeln "# ${mod}$key - key-sequence does not exist"
+                return
+                ;;
+            *) ;;
         esac
     fi
+    if [[ "$no_ctrl" = 1 ]]; then
+        # Indicate this key does not have a ctrl variant
+        case "$mod" in
+            C- | C-S- | C-M-)
+            writeln "# ${mod}$key - key-sequence does not exist"
+            return
+            ;;
+            *) ;;
+        esac
+    fi
+    if [[ "$no_meta" = 1 ]]; then
+        # Indicate this key does not have a meta variant
+        case "$mod" in
+            M- | M-S- | C-M- | C-S-M-)
+                writeln "# ${mod}$key - key-sequence does not exist"
+                return
+                ;;
+            *) ;;
+        esac
+    fi
+
+    case "$handling" in
+    s | S)  # single quotes
+        output+="'${mod}$key' display-message '${mod}$key'" ;;
+    d | D)  # double quotes
+        output+="\"${mod}$key\" display-message \"${mod}$key\"" ;;
+    db | DB) # double quotes & backslash
+        output+="\"${mod}\\$key\" display-message \"${mod}\\\\$key\"" ;;
+    *) output+="${mod}$key display-message \"${mod}$key\"" ;;
+    esac
+
     writeln "$output"
 }
 
@@ -76,50 +117,6 @@ header_3() {
 
 #---------------------------------------------------------------
 #
-#  Handle stack of override messages
-#
-#---------------------------------------------------------------
-push_skip_message() {
-    local msg="$1"
-    # writeln "# ><> push_skip_message($msg)"
-    skip_message_stack+=("$msg") # Push onto stack
-    skip_message="$msg"          # Set skip_message
-}
-
-pop_skip_message() {
-    local len=${#skip_message_stack[@]}
-
-    # [[ "$len" -gt 0 ]] && {
-    #     writeln "# ><> pop_skip_message() pre-size: $len msgs: ${skip_message_stack[*]}"
-    # }
-    if [[ "$len" -gt 0 ]]; then
-        unset "skip_message_stack[$((len - 1))]"        # Remove last element
-        skip_message_stack=("${skip_message_stack[@]}") # Rebuild array to avoid gaps
-    fi
-
-    # Reset skip_message only once using array length check
-    if [[ "${#skip_message_stack[@]}" -gt 0 ]]; then
-        skip_message="${skip_message_stack[$((${#skip_message_stack[@]} - 1))]}"
-        # writeln "# ><> pop_skip_message() post skip_message: $skip_message"
-    else
-        skip_message="" # If stack is empty, reset skip_message
-    fi
-}
-
-clear_skip_mesages_stack() {
-    # local len=${#skip_message_stack[@]}
-    # local msg
-    # [[ "$len" -gt 0 ]] && {
-    #     msg="# ><> clear_skip_mesages_stack()"
-    #     msg+=" pre-size: $len msgs: ${skip_message_stack[*]}"
-    #     writeln "$msg"
-    # }
-    skip_message_stack=() # Clear the stack
-    skip_message=""       # Reset skip_message to empty
-}
-
-#---------------------------------------------------------------
-#
 #  Define core tmux environment
 #
 #---------------------------------------------------------------
@@ -143,7 +140,7 @@ base_config() {
     writeln "$opt_s display-time 1000"
     writeln "$opt_w monitor-activity off"
     writeln "$opt_s visual-bell on"
-    writeln "$opt_s focus-events on"
+    # writeln "$opt_s focus-events on"
 
     $use_mouse && tmux_vers_ok "$mouse_vers_min" && writeln "$opt_s mouse on"
     tmux_vers_ok 2.6 && writeln "$opt_s monitor-bell off"
@@ -159,11 +156,11 @@ base_config() {
     if tmux_vers_ok 1.5 && command -v showkey >/dev/null; then
         cmd="showkey -a"
         msg+="using \"showkey -a\""
-        writeln "$opt_s default-command 'echo $msg ; $cmd'"
+        writeln "$opt_s default-command 'echo $msg ; echo ; $cmd'"
     else
         # fallback if no showkey
         msg+="without parsing"
-        writeln "$opt_s default-command 'echo $msg ; sleep 36000'"
+        writeln "$opt_s default-command 'echo $msg ; echo ; sleep 36000'"
     fi
 }
 
@@ -305,7 +302,7 @@ mouse_handling() {
 }
 
 lower_case_chars() {
-    clear_skip_mesages_stack
+    skip_message=""
     header_3 "Lower Case"
 
     case "$mod" in
@@ -374,7 +371,9 @@ lower_case_chars() {
     bind_char y
     bind_char z
 
-    ! tmux_vers_ok 2.2 && push_skip_message "Accents & umlauts can't be bound before 2.2"
+    ! tmux_vers_ok 2.2 && {
+        skip_message="Accents & umlauts can't be bound before 2.2"
+    }
     bind_char å
     bind_char ä
     bind_char ö
@@ -389,17 +388,17 @@ lower_case_chars() {
 }
 
 upper_case_chars() {
-    clear_skip_mesages_stack
+    skip_message=""
     header_3 "Upper Case"
     case "$mod" in
     C- | C-M-)
         if ! tmux_vers_ok 3.2; then
-            push_skip_message "Prior to 3.2 ${mod}Uppercase overrides ${mod}Lowercase"
-        elif ! tmux_vers_ok 3.5a; then
+            skip_message="Prior to 3.2 ${mod}Uppercase overrides ${mod}Lowercase"
+        elif ! tmux_vers_ok 3.6; then
             #region Blurb about using C-S-A instead of C-A
             writeln "
 #
-#  Versions 3.2 - 3.5 didn't handle C-uppercase properly.
+#  Versions 3.2 - 3.5 didn't handle ${mod}Uppercase properly.
 #  I will use a/A to make the samples easier to write but is the same for all uppercases.
 #
 #  Any action bound to C-A will be associated with C-a, overwriting anything already
@@ -418,11 +417,11 @@ upper_case_chars() {
         fi
         ;;
     C-S- | C-M-S-)
-        if ! tmux_vers_ok 3.2 || tmux_vers_ok 3.5a; then
-            push_skip_message "${mod}Uppercase only meaningful 3.2 - 3.5"
+        if ! tmux_vers_ok 3.2 || ! tmux_vers_ok 3.6; then
+            skip_message="${mod}Uppercase only meaningful 3.2 - 3.5"
         fi
         ;;
-    S- | M-S-) push_skip_message "S- modifier pointless" ;;
+    S- | M-S-) skip_message="S- modifier pointless" ;;
     *) ;;
     esac
 
@@ -476,7 +475,7 @@ upper_case_chars() {
     bind_char Z
 
     [[ -z "$skip_message" ]] && ! tmux_vers_ok 2.2 && {
-        push_skip_message "Accents & umlauts can't be bound before 2.2"
+        skip_message="Accents & umlauts can't be bound before 2.2"
     }
     bind_char Å
     bind_char Ä
@@ -492,7 +491,7 @@ upper_case_chars() {
 }
 
 non_letter_regular_cars() {
-    clear_skip_mesages_stack
+    skip_message=""
     header_3 "non-letter regular keys"
 
     case "$mod" in
@@ -503,34 +502,6 @@ non_letter_regular_cars() {
     *) ;;
     esac
 
-    # if [[ "$mod_long" = "Control" ]]; then
-    #    if tmux_vers_ok 1.7; then
-
-    bind_char "1"
-    bind_char "2"
-    bind_char "3"
-    bind_char "4"
-    bind_char "5"
-    bind_char "6"
-    bind_char "7"
-    bind_char "8"
-    bind_char "9"
-    bind_char "0"
-    bind_char "!"
-    bind_char '#' s
-    bind_char "("
-    bind_char ")"
-    bind_char "-"
-    bind_char "="
-    bind_char "+"
-    bind_char ":"
-    bind_char "'" d
-    bind_char ","
-    bind_char "."
-    bind_char "<" d
-    bind_char ">" d
-    #     fi
-    # fi
 
     bind_char "@"
     bind_char "^"
@@ -549,51 +520,64 @@ non_letter_regular_cars() {
 
     bind_char "]"
     bind_char "\\\\" d
-    bind_char "?" d
 
-    if tmux_vers_ok 3.0; then
-        bind_char ";" d
-    else
-        writeln "# Prior to 3.0 ${mod}; not supported"
-    fi
+    #
+    # Sorted
+    #
+    (
+        local no_ctrl=1
 
-    ! tmux_vers_ok 2.2 && push_skip_message "Not handled before 2.2"
-    bind_char §
-    bind_char ± # plus-minus sign
-    bind_char ° # degree symbol
-    bind_char £
-    bind_char €
-    bind_char "´"
-    pop_skip_message
+        bind_char "!"
+        bind_char '"' s
+        bind_char '#' s
+        bind_char '$' s
+        bind_char % d
+        bind_char "\&" d
+        bind_char "'" d
+        bind_char "("
+        bind_char ")"
+        bind_char '*' d
+        bind_char "+"
+        bind_char ","
+        bind_char "-"
+        bind_char "."
+        bind_char "/"
+        bind_char "0"
+        bind_char "1"
+        bind_char "2"
+        bind_char "3"
+        bind_char "4"
+        bind_char "5"
+        bind_char "6"
+        bind_char "7"
+        bind_char "8"
+        bind_char "9"
+        bind_char ":"
+        bind_char "<" d
+        bind_char "="
+        bind_char ">" d
+        bind_char "?" d
+        bind_char "\`" d
+        bind_char "{" d
+        bind_char "|" d
+        bind_char "}" d
+        bind_char '~' s
 
-    tmux_vers_ok 3.3 || {
-        case "$mod" in
-        "C-" | "C-M-") push_skip_message "Not handled before 3.3" ;;
-        *) ;;
-        esac
-    }
-    bind_char "\`" d
-    bind_char "/"
+        ! tmux_vers_ok 3.0 && skip_message="Not handled before 3.0"
+        bind_char ";" db
 
-    tmux_vers_ok 3.5 || {
-        case "$mod" in
-        C- | C-M-) push_skip_message "Not handled before 3.5" ;;
-        *) ;;
-        esac
-    }
-    bind_char '~' s
-    bind_char '$' s
-    bind_char % d
-    bind_char "\&" d
-    bind_char '*' d
-    bind_char "{" d
-    bind_char "}" d
-    bind_char "|" d
-    bind_char '"' s
+        ! tmux_vers_ok 2.2 && skip_message="Not handled before 2.2"
+        bind_char §
+        bind_char ± # plus-minus sign
+        bind_char ° # degree symbol
+        bind_char £
+        bind_char €
+        bind_char "´"
+    )
 }
 
 special_basic_keys() {
-    clear_skip_mesages_stack
+    skip_message=""
     header_2 "Special basic keys"
 
     case "$mod" in
@@ -612,43 +596,38 @@ special_basic_keys() {
 
     bind_char bTab
 
-    case "$mod" in
-        C- | C-S- | C-M- | C-M-S-)
-            if tmux_vers_ok 1.7; then
-                bind_char Enter
-            fi
-            ;;
-        *) bind_char Enter ;;
-    esac
-    bind_char Space
+    # case "$mod" in
+    #     C- | C-S- | C-M- | C-M-S-)
+    #         if tmux_vers_ok 1.7; then
+    #             bind_char Enter
+    #         fi
+    #         ;;
+    #     *) bind_char Enter ;;
+    # esac
+    (
+        local no_shift=1
+        bind_char Space
+
+        local no_ctrl=1
+        bind_char Enter
+    )
     bind_char BSpace
     bind_char Up
     bind_char Down
     bind_char Left
     bind_char Right
 
-    # tmux_vers_ok 3.1 || {
-    #     case "$mod" in
-    #     C- | C-S- | C-M- | C-M-S-)
-    #         push_skip_message "Not handled before 3.2"
-    #         ;;
-    #     *) ;;
-    #     esac
-    # }
-
     case "$mod" in
-    C- | C-S- | C-M- | C-M-S-)
-        tmux_vers_ok 3.2a || {
-            push_skip_message "Not handled before 3.2a"
-        }
-        ;;
-    *) ;;
+        M- | M-S- | C-M- | C-M-S-) tmux_vers_ok 2.3 || skip_message="Not handled before 2.3" ;;
+        *) ;;
     esac
+    local no_shift=1
+    local no_ctrl=1
     bind_char Escape
 }
 
 func_keys() {
-    clear_skip_mesages_stack
+    skip_message=""
     header_2 "Function keys"
     bind_char F1
     bind_char F2
@@ -665,7 +644,7 @@ func_keys() {
 }
 
 above_arrows() {
-    clear_skip_mesages_stack
+    skip_message=""
     header_2 "Group normally above arrows"
     bind_char IC # Insert
     bind_char DC # Delete
@@ -681,7 +660,7 @@ above_arrows() {
 }
 
 num_keyboard() {
-    clear_skip_mesages_stack
+    skip_message=""
     header_2 "Num Keyboard"
     bind_char KP/
     bind_char "KP*" d
@@ -741,8 +720,11 @@ process_mod() {
 
 d_tkbtst_location="$(dirname "$(realpath "$0")")"
 
-# Stack to store messages
-declare -a skip_message_stack=()
+# If either is 1 the modifier does not have any valid key sequences
+no_shift=0
+no_ctrl=0
+no_meta=0
+
 skip_message=""
 
 use_mouse=false
