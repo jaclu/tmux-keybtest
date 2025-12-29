@@ -70,8 +70,8 @@ tmux_vers_ok() {
     # If the desired version has a suffix but the running version doesn't, fail
     [ -n "$_suf" ] && [ -z "$tpt_current_vers_suffix" ] && return 1
     # Perform lexicographical comparison of suffixes only if necessary
-    [ "$(printf '%s\n%s\n' "$_suf" "$tpt_current_vers_suffix" |
-        LC_COLLATE=C sort | head -n 1)" = "$_suf" ] && return 0
+    [ "$(printf '%s\n%s\n' "$_suf" "$tpt_current_vers_suffix" \
+        | LC_COLLATE=C sort | head -n 1)" = "$_suf" ] && return 0
 
     # If none of the above conditions are met, the version is insufficient
     return 1
@@ -139,8 +139,8 @@ tpt_dependency_check() {
             # display-popup is buggy on the iSH platform, so use fallback
 
             if [ "$_height_adjusted" -ge 8 ]; then
-                _line_split="$(echo "$tpt_missing_dependencies" |
-                    sed 's/ /\n /g' | sed 's/|/ or /g')"
+                _line_split="$(echo "$tpt_missing_dependencies" \
+                    | sed 's/ /\n /g' | sed 's/|/ or /g')"
                 _popup_content="$(printf '\n%s:\n\n %s\n\n%s ' \
                     "$_failed_dep_popup_line_1" \
                     "$_line_split" \
@@ -166,8 +166,8 @@ tpt_dependency_check() {
             _current_pane="$($TMUX_BIN display -p '#{pane_id}')"
             _pty="$($TMUX_BIN display-message -p -t "$_current_pane" "#{pane_tty}")"
 
-            _formatted="$(printf "%s" "$tpt_missing_dependencies" |
-                sed 's/ /\n  /g' | sed 's/|/ or /g')"
+            _formatted="$(printf "%s" "$tpt_missing_dependencies" \
+                | sed 's/ /\n  /g' | sed 's/|/ or /g')"
             printf '\nFailed dependency for %s\n  %s\n' \
                 "$_failed_dep_text_label" "$_formatted" \
                 >"$_pty"
@@ -319,14 +319,14 @@ tpt_define_plugin_env() {
     # tpt_log_it "trying to extract plugin name & folder from [$_caller]"
 
     # Assume plugin name is folder name following ../plugins/
-    tpt_plugin_name="$(echo "$_caller" | grep plugins | sed 's#plugins/# #' |
-        cut -d' ' -f 2 | cut -d/ -f 1)"
+    tpt_plugin_name="$(echo "$_caller" | grep plugins | sed 's#plugins/# #' \
+        | cut -d' ' -f 2 | cut -d/ -f 1)"
     if [ -n "$tpt_plugin_name" ]; then
         _failed_dep_popup_label=" plugin: $tpt_plugin_name "
         _failed_dep_popup_line_1="Failed dependencies"
         _failed_dep_text_label="plugin: $tpt_plugin_name"
-        tpt_d_plugin="$(echo "$_caller" |
-            sed "s#$tpt_plugin_name#$tpt_plugin_name\|#" | cut -d'|' -f1)"
+        tpt_d_plugin="$(echo "$_caller" \
+            | sed "s#$tpt_plugin_name#$tpt_plugin_name\|#" | cut -d'|' -f1)"
     else
         # As a fallback, use full path of script that called this, to at least
         # give some hint
@@ -353,39 +353,39 @@ tpt_display_env() {
 tpt_parse_cmd_line() {
     tpt_log_it "tpt_parse_cmd_line()"
     case "$1" in
-    dependency-check)
-        shift
-        tpt_dependency_check "$@"
-        ;;
-    self-test) # Use this as a basic self-test
-        shift
-        tpt_tests "$@"
-        ;;
-    env)
-        shift
-        tpt_debug_mode=1
-        tpt_define_plugin_env
-        tpt_display_env
-        ;;
-    *)
-        echo "Valid params:"
-        echo
-        echo "dependency-check 'space separated string of dependencies'"
-        echo "  If tmux >= 3.2 a popup will be used to display failed dependencies"
-        echo "  For older tmux versions and if called from outside tmux, It will be printed."
-        echo
-        echo "env"
-        echo "  Display environment picked up"
-        echo
-        echo "self-test [skip-notifications]"
-        echo "  This will demonstrate both tools:"
-        echo "    tmux_vers_ok - to check if a given feature is available"
-        echo "    tpt_dependency_check - to check if a tool is installed"
-        echo "      skip-notifications - lets the caller present failed dependencies"
-        echo "        Only returning false. Failed dependencies are set in the variable"
-        echo "        tpt_missing_dependencies"
-        echo
-        ;;
+        dependency-check)
+            shift
+            tpt_dependency_check "$@"
+            ;;
+        self-test) # Use this as a basic self-test
+            shift
+            tpt_tests "$@"
+            ;;
+        env)
+            shift
+            tpt_debug_mode=1
+            tpt_define_plugin_env
+            tpt_display_env
+            ;;
+        *)
+            echo "Valid params:"
+            echo
+            echo "dependency-check 'space separated string of dependencies'"
+            echo "  If tmux >= 3.2 a popup will be used to display failed dependencies"
+            echo "  For older tmux versions and if called from outside tmux, It will be printed."
+            echo
+            echo "env"
+            echo "  Display environment picked up"
+            echo
+            echo "self-test [skip-notifications]"
+            echo "  This will demonstrate both tools:"
+            echo "    tmux_vers_ok - to check if a given feature is available"
+            echo "    tpt_dependency_check - to check if a tool is installed"
+            echo "      skip-notifications - lets the caller present failed dependencies"
+            echo "        Only returning false. Failed dependencies are set in the variable"
+            echo "        tpt_missing_dependencies"
+            echo
+            ;;
     esac
 }
 

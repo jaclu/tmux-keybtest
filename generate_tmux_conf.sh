@@ -51,9 +51,9 @@ bind_char() {
         # Indicate this key does not have a ctrl variant
         case "$mod" in
             C- | C-S- | C-M-)
-            writeln "# ${mod}$key - key-sequence does not exist"
-            return
-            ;;
+                writeln "# ${mod}$key - key-sequence does not exist"
+                return
+                ;;
             *) ;;
         esac
     fi
@@ -69,13 +69,13 @@ bind_char() {
     fi
 
     case "$handling" in
-    s | S)  # single quotes
-        output+="'${mod}$key' display-message '${mod}$key'" ;;
-    d | D)  # double quotes
-        output+="\"${mod}$key\" display-message \"${mod}$key\"" ;;
-    db | DB) # double quotes & backslash
-        output+="\"${mod}\\$key\" display-message \"${mod}\\\\$key\"" ;;
-    *) output+="${mod}$key display-message \"${mod}$key\"" ;;
+        s | S) # single quotes
+            output+="'${mod}$key' display-message '${mod}$key'" ;;
+        d | D) # double quotes
+            output+="\"${mod}$key\" display-message \"${mod}$key\"" ;;
+        db | DB) # double quotes & backslash
+            output+="\"${mod}\\$key\" display-message \"${mod}\\\\$key\"" ;;
+        *) output+="${mod}$key display-message \"${mod}$key\"" ;;
     esac
 
     writeln "$output"
@@ -306,11 +306,11 @@ lower_case_chars() {
     header_3 "Lower Case"
 
     case "$mod" in
-    S- | C-S- | M-S- | C-M-S-)
-        writeln "# $mod  - should be handled in Upper Case section"
-        return
-        ;;
-    *) ;;
+        S- | C-S- | M-S- | C-M-S-)
+            writeln "# $mod  - should be handled in Upper Case section"
+            return
+            ;;
+        *) ;;
     esac
 
     bind_char a
@@ -323,14 +323,14 @@ lower_case_chars() {
     bind_char h
 
     case "$mod" in
-    C- | C-M-)
-        if tmux_vers_ok 3.5; then
-            bind_char i
-        else
-            writeln "# Prior to 3.5 ${mod}i overrides Tab"
-        fi
-        ;;
-    *) bind_char i ;;
+        C- | C-M-)
+            if tmux_vers_ok 3.5; then
+                bind_char i
+            else
+                writeln "# Prior to 3.5 ${mod}i overrides Tab"
+            fi
+            ;;
+        *) bind_char i ;;
     esac
 
     bind_char j
@@ -338,14 +338,14 @@ lower_case_chars() {
     bind_char l
 
     case "$mod" in
-    C- | C-M-)
-        if tmux_vers_ok 3.5; then
-            bind_char m
-        else
-            writeln "# Prior to 3.5 ${mod}m overrides Enter"
-        fi
-        ;;
-    *) bind_char m ;;
+        C- | C-M-)
+            if tmux_vers_ok 3.5; then
+                bind_char m
+            else
+                writeln "# Prior to 3.5 ${mod}m overrides Enter"
+            fi
+            ;;
+        *) bind_char m ;;
     esac
 
     bind_char n
@@ -360,12 +360,12 @@ lower_case_chars() {
     bind_char w
 
     case "$mod" in
-    C-)
-        # Special case don't bind this to the root table, in order to display prefix
-        # on second press
-        writeln "bind '${mod}x' display-message '${mod}x'"
-        ;;
-    *) bind_char x ;;
+        C-)
+            # Special case don't bind this to the root table, in order to display prefix
+            # on second press
+            writeln "bind '${mod}x' display-message '${mod}x'"
+            ;;
+        *) bind_char x ;;
     esac
 
     bind_char y
@@ -391,12 +391,12 @@ upper_case_chars() {
     skip_message=""
     header_3 "Upper Case"
     case "$mod" in
-    C- | C-M-)
-        if ! tmux_vers_ok 3.2; then
-            skip_message="Prior to 3.2 ${mod}Uppercase overrides ${mod}Lowercase"
-        elif ! tmux_vers_ok 3.6; then
-            #region Blurb about using C-S-A instead of C-A
-            writeln "
+        C- | C-M-)
+            if ! tmux_vers_ok 3.2; then
+                skip_message="Prior to 3.2 ${mod}Uppercase overrides ${mod}Lowercase"
+            elif ! tmux_vers_ok 3.6; then
+                #region Blurb about using C-S-A instead of C-A
+                writeln "
 #
 #  Versions 3.2 - 3.5 didn't handle ${mod}Uppercase properly.
 #  I will use a/A to make the samples easier to write but is the same for all uppercases.
@@ -412,17 +412,17 @@ upper_case_chars() {
 #  thus C- / C-M- Uppercase is skipped for this tmux version.
 #
 "
-            #endregion
-            return
-        fi
-        ;;
-    C-S- | C-M-S-)
-        if ! tmux_vers_ok 3.2 || ! tmux_vers_ok 3.6; then
-            skip_message="${mod}Uppercase only meaningful 3.2 - 3.5"
-        fi
-        ;;
-    S- | M-S-) skip_message="S- modifier pointless" ;;
-    *) ;;
+                #endregion
+                return
+            fi
+            ;;
+        C-S- | C-M-S-)
+            if ! tmux_vers_ok 3.2 || ! tmux_vers_ok 3.6; then
+                skip_message="${mod}Uppercase only meaningful 3.2 - 3.5"
+            fi
+            ;;
+        S- | M-S-) skip_message="S- modifier pointless" ;;
+        *) ;;
     esac
 
     bind_char A
@@ -435,14 +435,14 @@ upper_case_chars() {
     bind_char H
 
     case "$mod" in
-    C- | C-M-)
-        if tmux_vers_ok 3.5; then
-            bind_char I
-        else
-            writeln "# Prior to 3.5 ${mod}I overrides Tab"
-        fi
-        ;;
-    *) bind_char I ;;
+        C- | C-M-)
+            if tmux_vers_ok 3.5; then
+                bind_char I
+            else
+                writeln "# Prior to 3.5 ${mod}I overrides Tab"
+            fi
+            ;;
+        *) bind_char I ;;
     esac
 
     bind_char J
@@ -450,14 +450,14 @@ upper_case_chars() {
     bind_char L
 
     case "$mod" in
-    C- | C-M-)
-        if tmux_vers_ok 3.5; then
-            bind_char M
-        else
-            writeln "# Prior to 3.5 ${mod}M overrides Enter"
-        fi
-        ;;
-    *) bind_char M ;;
+        C- | C-M-)
+            if tmux_vers_ok 3.5; then
+                bind_char M
+            else
+                writeln "# Prior to 3.5 ${mod}M overrides Enter"
+            fi
+            ;;
+        *) bind_char M ;;
     esac
 
     bind_char N
@@ -495,27 +495,26 @@ non_letter_regular_cars() {
     header_3 "non-letter regular keys"
 
     case "$mod" in
-    S- | C-S- | M-S- | C-M-S-)
-        writeln "# $mod  - These don't differ between upper/lower case"
-        return
-        ;;
-    *) ;;
+        S- | C-S- | M-S- | C-M-S-)
+            writeln "# $mod  - These don't differ between upper/lower case"
+            return
+            ;;
+        *) ;;
     esac
-
 
     bind_char "@"
     bind_char "^"
     bind_char "_"
 
     case "$mod" in
-    C- | C-M-)
-        if tmux_vers_ok 3.5; then
-            bind_char "["
-        else
-            writeln "# Prior to 3.5 ${mod}[ overrides Escape"
-        fi
-        ;;
-    *) bind_char "[" ;;
+        C- | C-M-)
+            if tmux_vers_ok 3.5; then
+                bind_char "["
+            else
+                writeln "# Prior to 3.5 ${mod}[ overrides Escape"
+            fi
+            ;;
+        *) bind_char "[" ;;
     esac
 
     bind_char "]"
@@ -690,15 +689,15 @@ regular_chars() {
 process_mod() {
     mod="$1"
     case "$mod" in
-    "") mod_long="No Prefix" ;;
-    S-) mod_long="Shift" ;;
-    C-) mod_long="Control" ;;
-    M-) mod_long="Meta" ;;
-    C-S-) mod_long="Control-Shift" ;;
-    M-S-) mod_long="Meta-Shift" ;;
-    C-M-) mod_long="Control-Meta" ;;
-    C-M-S-) mod_long="Control-Meta-Shift" ;;
-    *) mod_long="Unknown mod: $mod" ;;
+        "") mod_long="No Prefix" ;;
+        S-) mod_long="Shift" ;;
+        C-) mod_long="Control" ;;
+        M-) mod_long="Meta" ;;
+        C-S-) mod_long="Control-Shift" ;;
+        M-S-) mod_long="Meta-Shift" ;;
+        C-M-) mod_long="Control-Meta" ;;
+        C-M-S-) mod_long="Control-Meta-Shift" ;;
+        *) mod_long="Unknown mod: $mod" ;;
     esac
 
     echo "Configuring key capture for modifier: $mod_long" >/dev/stderr
