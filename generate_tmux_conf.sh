@@ -529,8 +529,6 @@ non_letter_regular_cars() {
         bind_char "!"
         bind_char '"' s
         bind_char '#' s
-        bind_char '$' s
-        bind_char % d
         bind_char "\&" d
         bind_char "'" d
         bind_char "("
@@ -562,16 +560,91 @@ non_letter_regular_cars() {
         bind_char "}" d
         bind_char '~' s
 
-        ! tmux_vers_ok 3.0 && skip_message="Not handled before 3.0"
-        bind_char ";" db
+        bind_char '$' s
+        bind_char % d # percent sign
 
-        ! tmux_vers_ok 2.2 && skip_message="Not handled before 2.2"
-        bind_char §
-        bind_char ± # plus-minus sign
-        bind_char ° # degree symbol
-        bind_char £
-        bind_char €
-        bind_char "´"
+        tmux_vers_ok 2.2 || skip_message="Not handled before 2.2"
+
+        bind_char § # Paragraph
+
+        # monetary symbols
+        bind_char ¢ # cent sign
+        bind_char £ # Pound
+        bind_char € # Euro
+        bind_char ¥ # Yen sign
+
+        # Latin letters with diacritics and ligatures
+        bind_char Â # A with circumflex
+        bind_char Æ # ligature AE
+        bind_char Ç # C with cedilla
+        bind_char ı # small letter dotless I
+        bind_char Î # I with circumflex
+        bind_char Ï # I with diaeresis
+        bind_char Ò # O with grave
+        bind_char Ô # O with circumflex
+        bind_char Ø # O with stroke
+        bind_char Œ # capital ligature OE - on iSH keyboards: M-S-Q
+        bind_char Ü # U with diaeresis
+
+        # Diacritical marks (spacing / modifier letters)
+        bind_char "´" # acute accent
+        bind_char ˆ   # modifier letter circumflex accent
+        bind_char ˇ   # Caron                  - on iSH keyboards: M-S-
+        bind_char ˜   # small tilde
+        bind_char ¯   # macron
+        bind_char ˘   # Breve
+        bind_char ˚   # ring above
+        bind_char ˝   # double acute accent
+        bind_char ¸   # Cedilla
+        bind_char ˛   # ogonek
+        bind_char ¨   # diaeresis / umlaut
+
+        # Inverted punctuation (Spanish)
+        bind_char ¿ # inverted question mark
+        bind_char ¡ # inverted exclamation mark
+
+        # Mathematical operators and symbols
+        bind_char ± # plus-minus sign             - on iSH keyboards: M-S-=
+        bind_char ≠ # not equal to
+        bind_char √ # square root
+        bind_char ∆ # increment
+        bind_char ∏ # n-ary product
+        bind_char ∑ # n-ary summation
+        bind_char ∫ # integral
+        bind_char ⁄ # fraction slash
+        bind_char ° # degree sign             - on iSH keyboards: M-S-8
+
+        bind_char ‰ # per mille sign            - on iSH keyboards: M-S-R
+
+        # Logic and ordinal symbols
+
+        bind_char ¬ # NOT sign
+        bind_char º # masculine ordinal indicator
+
+        # Quotation marks (typographic)
+        bind_char '“' # left double quotation mark
+        bind_char '”' # right double quotation mark
+        bind_char ‚   # single low-9 quotation mark
+        bind_char „   # double low-9 quotation mark
+        bind_char "‘" # left single quotation mark
+        bind_char "’" # right single quotation mark
+        bind_char ‹   # single left-pointing angle quotation mark
+        bind_char ›   # single right-pointing angle quotation mark
+        bind_char «   # left-pointing double angle quotation mark
+        bind_char »   # right-pointing double angle quotation mark
+
+        # Typographic and editorial symbols
+        bind_char · # middle dot                - on iSH keyboards: M-S-9
+        bind_char — # em dash
+        bind_char ¶ # pilcrow sign
+        bind_char ‡ # double dagger
+        bind_char ﬂ # small ligature FL
+
+        # Geometric and technical symbols
+        bind_char ◊ # Lozenge
+
+        tmux_vers_ok 3.0 || skip_message="Not handled before 3.0"
+        bind_char ";" db # surprisingly ; couldn't be bound until fairly recently
     )
 }
 
@@ -581,9 +654,7 @@ special_basic_keys() {
 
     case "$mod" in
         C- | C-S- | C-M- | C-M-S-)
-            if tmux_vers_ok 1.7; then
-                bind_char Tab
-            fi
+            tmux_vers_ok 1.8 && bind_char Tab
             ;;
         S-)
             if tmux_vers_ok 1.4; then
