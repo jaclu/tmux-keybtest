@@ -195,12 +195,17 @@ define_status_bar() {
         #
         # For older version only one line is available
         #
-        writeln "# Display exit hint in Status bar left"
-        writeln "$opt_s status-justify left"
+        writeln "# make win status invisible"
         if tmux_vers_ok 1.4; then
             writeln "$opt_w window-status-format ''"
             writeln "$opt_w window-status-current-format ''"
+        else
+            writeln "$opt_w window-status-fg green"
         fi
+        writeln
+
+        writeln "# Display exit hint in Status bar left"
+        writeln "$opt_s status-justify left"
         writeln "$opt_s status-left '$exit_procedure This displays recognized keys'"
     fi
 
