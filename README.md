@@ -18,6 +18,12 @@ Note: If your operating system or terminal has already bound certain keys,
 tmux may not detect them. It may be possible to reconfigure your system or
 terminal to free up these keys for tmux use.
 
+## Compatibility
+
+- tmux 1.4 and up
+- tmux 1.1
+- tmux 1.0
+
 ## Usage
 
 1. Clone this repository and navigate to its directory.
