@@ -310,6 +310,9 @@ lower_case_chars() {
             writeln "# $mod  - should be handled in Upper Case section"
             return
             ;;
+        C-M-)
+            tmux_vers_ok 1.2 || skip_message="Not handled before 1.2"
+            ;;
         *) ;;
     esac
 
@@ -499,6 +502,9 @@ non_letter_regular_cars() {
             writeln "# $mod  - These don't differ between upper/lower case"
             return
             ;;
+        C-M-)
+            tmux_vers_ok 1.2 || skip_message="Not handled before 1.2"
+            ;;
         *) ;;
     esac
 
@@ -655,28 +661,26 @@ special_basic_keys() {
     case "$mod" in
         C- | C-S- | C-M- | C-M-S-)
             tmux_vers_ok 1.8 && bind_char Tab
+            tmux_vers_ok 1.2 || skip_message="Not handled before 1.2"
             ;;
-        S-)
-            if tmux_vers_ok 1.4; then
-                bind_char Tab
+        S- | M-S-)
+            if tmux_vers_ok 1.2; then
+                if tmux_vers_ok 1.4; then
+                    bind_char Tab
+                fi
+            else
+                skip_message="Not handled before 1.2"
             fi
             ;;
         *) bind_char Tab ;;
     esac
 
     bind_char bTab
-
-    # case "$mod" in
-    #     C- | C-S- | C-M- | C-M-S-)
-    #         if tmux_vers_ok 1.7; then
-    #             bind_char Enter
-    #         fi
-    #         ;;
-    #     *) bind_char Enter ;;
-    # esac
     (
-        local no_shift=1
-        bind_char Space
+        if tmux_vers_ok 1.1; then
+            local no_shift=1
+            bind_char Space
+        fi
 
         local no_ctrl=1
         bind_char Enter
@@ -699,6 +703,14 @@ special_basic_keys() {
 func_keys() {
     skip_message=""
     header_2 "Function keys"
+
+    case "$mod" in
+        S- | C-S- | M-S- | C-M- | C-M-S-)
+            tmux_vers_ok 1.2 || skip_message="Not handled before 1.2"
+            ;;
+        *) ;;
+    esac
+
     bind_char F1
     bind_char F2
     bind_char F3
@@ -716,6 +728,12 @@ func_keys() {
 above_arrows() {
     skip_message=""
     header_2 "Group normally above arrows"
+    case "$mod" in
+        S- | C-S- | M-S- | C-M- | C-M-S-)
+            tmux_vers_ok 1.2 || skip_message="Not handled before 1.2"
+            ;;
+        *) ;;
+    esac
     bind_char IC # Insert
     bind_char DC # Delete
     bind_char Home
@@ -732,6 +750,12 @@ above_arrows() {
 num_keyboard() {
     skip_message=""
     header_2 "Num Keyboard"
+    case "$mod" in
+        S- | C-S- | M-S- | C-M- | C-M-S-)
+            tmux_vers_ok 1.2 || skip_message="Not handled before 1.2"
+            ;;
+        *) ;;
+    esac
     bind_char KP/
     bind_char "KP*" d
     bind_char KP-
