@@ -145,5 +145,6 @@ This is probably amongst the least intuitive features in tmux
 To determine what sequence a key generates, use the following commands outside
 of tmux:
 
-- `showkeys -a`
+- `cat` - for simple cases just displaying the key sequence
+- `showkeys -a` - breaks down each char in dec/oct/hex
 - `xxd`
