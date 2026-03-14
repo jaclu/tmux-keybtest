@@ -29,7 +29,8 @@ terminal to free up these keys for tmux use.
 1. Clone this repository and navigate to its directory.
 2. Run `keybtest.sh` this generates a `keybtest.conf` for the version of tmux
    found and starts a tmux session that will display the tmux notation for any
-   recognized key press.
+   recognized key press. Use `keybtest.sh -m` if mouse events should also be
+   parsed.
 
 ### Important Notes
 
