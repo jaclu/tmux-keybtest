@@ -40,6 +40,22 @@ terminal to free up these keys for tmux use.
 - To exit the session, press `C-x C-c`. The exit sequence is displayed in
   the status line for convenience.
 
+### Terminal App issues
+
+#### Ghossy - at least on MacOS
+
+Some keys are not parsed by tmux correctly despite when checking with `showkey -a`
+Ghostty generates the same sequences as Kitty & iTerm2
+
+Example Upper case Alt characters, using A as a sample:
+
+- M-A generates ^[A but tmux fails to parse it as M-A
+
+Another specific key is S-F11, the expected sequence: `^[[13;2~` is generated,
+but not parsed by tmux.
+
+I have tried various settings for `escape-time` but it didn't solve the issue.
+
 ### tmux Key Name Prefixes
 
 - `S-` : Shift key is pressed.
