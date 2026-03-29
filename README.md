@@ -124,6 +124,7 @@ intended one (e.g., `M-Up` generates `S-F3`), bind the desired action for `M-Up`
 If a terminal generates an unrecognized but unique sequence, you can bind it
 to an action using user-keys. Tmux requires octal notation for user-keys,
 formatted as three digit values (0 padded) and prefixed with `\`.
+So octal `42` would be written as `\042`
 
 `showkey -a` can be used to find the octals, examine the middle column.
 
@@ -146,5 +147,5 @@ To determine what sequence a key generates, use the following commands outside
 of tmux:
 
 - `cat` - for simple cases just displaying the key sequence
-- `showkeys -a` - breaks down each char in dec/oct/hex
+- `showkey -a` - breaks down each char in dec/oct/hex
 - `xxd`
