@@ -43,9 +43,9 @@ terminal to free up these keys for tmux use.
 
 ### Terminal App issues
 
-#### Ghossy - at least on MacOS
+#### Ghostty - at least on MacOS
 
-Some keys are not parsed by tmux correctly despite when checking with `showkey -a`
+Some keys are not parsed by tmux correctly despite when checking with `cat` or `showkey -a`
 Ghostty generates the same sequences as Kitty & iTerm2
 
 Example Upper case Alt characters, using A as a sample:
