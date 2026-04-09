@@ -70,11 +70,14 @@ bind_char() {
 
     case "$handling" in
         s | S) # single quotes
-            output+="'${mod}$key' display-message '${mod}$key'" ;;
+            output+="'${mod}$key' display-message '${mod}$key'"
+            ;;
         d | D) # double quotes
-            output+="\"${mod}$key\" display-message \"${mod}$key\"" ;;
+            output+="\"${mod}$key\" display-message \"${mod}$key\""
+            ;;
         db | DB) # double quotes & backslash
-            output+="\"${mod}\\$key\" display-message \"${mod}\\\\$key\"" ;;
+            output+="\"${mod}\\$key\" display-message \"${mod}\\\\$key\""
+            ;;
         *) output+="${mod}$key display-message \"${mod}$key\"" ;;
     esac
 
