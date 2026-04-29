@@ -4,7 +4,7 @@
 detect in your terminal. When you press a key, its tmux name, like `C-M-Up`,
 will be displayed on the status line if recognized.
 
-Terminals are often rather limited in what keys they implement supported beyond the basics.
+Terminals are often rather limited in what keys they support beyond the basics.
 
 In some cases missing keys can be configured, but especially on tablets this is
 usually fairly limited.
@@ -20,14 +20,13 @@ terminal to free up these keys for tmux use.
 
 ## Compatibility
 
-- tmux 1.4 and up
-- tmux 1.1
-- tmux 1.0
+Tested and verified on tmux 1.0, 1.1, 1.4, and all versions from 1.5 onwards.
+Versions 1.2 and 1.3 are untested.
 
 ## Usage
 
 1. Clone this repository and navigate to its directory.
-2. Run `keybtest.sh` this generates a `keybtest.conf` for the version of tmux
+2. Run `keybtest.sh`, which generates a `keybtest.conf` for the version of tmux
    found and starts a tmux session that will display the tmux notation for any
    recognized key press. Use `keybtest.sh -m` if mouse events should also be
    parsed.
@@ -45,7 +44,7 @@ terminal to free up these keys for tmux use.
 
 #### Ghostty - at least on MacOS
 
-Some keys are not parsed by tmux correctly despite when checking with `cat` or `showkey -a`
+Some keys are not parsed by tmux correctly despite checking with `cat` or `showkey -a`
 Ghostty generates the same sequences as Kitty & iTerm2
 
 Example Upper case Alt characters, using A as a sample:
