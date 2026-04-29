@@ -151,4 +151,6 @@ of tmux:
 
 ## Contributors & Acknowledgments
 
-- **Claude Code** - Documentation review, README grammar and clarity improvements
+- **Claude Code** - Identified and fixed logic error in version gating for uppercase
+  key modifiers (3.2-3.5 range); documentation review, README grammar and clarity
+  improvements
