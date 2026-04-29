@@ -148,3 +148,7 @@ of tmux:
 - `cat` - for simple cases just displaying the key sequence
 - `showkey -a` - breaks down each char in dec/oct/hex
 - `xxd`
+
+## Contributors & Acknowledgments
+
+- **Claude Code** - Documentation review, README grammar and clarity improvements
