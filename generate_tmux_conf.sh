@@ -831,9 +831,16 @@ skip_message=""
 
 use_mouse=false
 mouse_vers_min="2.1"
+bind_n_vers_min="1.0"
 
 # shellcheck source=utils.sh
 . "$d_tkbtst_location"/utils.sh
+
+tmux_vers_ok "$bind_n_vers_min" || {
+    echo "ERROR: bind -n (no-prefix key binding) is not available prior to tmux $bind_n_vers_min"
+    echo "       tmux 0.8 and 0.9 cannot be supported by this tool"
+    exit 1
+}
 
 [[ "$1" = "-m" ]] && {
     tmux_vers_ok "$mouse_vers_min" || {
