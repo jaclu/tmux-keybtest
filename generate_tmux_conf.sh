@@ -128,7 +128,7 @@ base_config() {
 
     writeln "#==========================================================="
     writeln "#"
-    writeln "#  Tmux conf for teting keyboard implementation, and what"
+    writeln "#  Tmux conf for testing keyboard implementation, and what"
     writeln "#  non standard sequences it can generate. - Arrows with modifiers etc"
     # shellcheck disable=SC2154
     writeln "# Created for tmux version: $tpt_current_vers"
@@ -147,7 +147,7 @@ base_config() {
 
     $use_mouse && tmux_vers_ok "$mouse_vers_min" && writeln "$opt_s mouse on"
     tmux_vers_ok 2.6 && writeln "$opt_s monitor-bell off"
-    tmux_vers_ok 2.8 && writeln "bind Any display 'This key is not bound to any action'"
+    tmux_vers_ok 3.2 && writeln "bind Any display 'This key is not bound to any action'"
     tmux_vers_ok 3.2 && {
         writeln "$opt_s extended-keys on"
         writeln "set -g -a terminal-features '*:extkeys'"
@@ -302,7 +302,7 @@ mouse_handling() {
                 bind_char "${event}${button}${location}" s
             done
         done
-        # Obly loop over location for Wheel events
+        # Only loop over location for Wheel events
         bind_char "WheelUp$location"
         bind_char "WheelDown$location"
     done
@@ -428,7 +428,7 @@ upper_case_chars() {
             fi
             ;;
         C-S- | C-M-S-)
-            if ! tmux_vers_ok 3.2 || ! tmux_vers_ok 3.6; then
+            if ! tmux_vers_ok 3.2 || tmux_vers_ok 3.6; then
                 skip_message="${mod}Uppercase only meaningful 3.2 - 3.5"
             fi
             ;;
@@ -501,7 +501,7 @@ upper_case_chars() {
     bind_char Ý
 }
 
-non_letter_regular_cars() {
+non_letter_regular_chars() {
     skip_message=""
     header_3 "non-letter regular keys"
 
@@ -683,7 +683,7 @@ special_basic_keys() {
         *) bind_char Tab ;;
     esac
 
-    bind_char bTab
+    bind_char BTab
     (
         if tmux_vers_ok 1.1; then
             local no_shift=1
@@ -786,7 +786,7 @@ regular_chars() {
     header_2 "Regular keys"
     lower_case_chars
     upper_case_chars
-    non_letter_regular_cars
+    non_letter_regular_chars
 }
 
 process_mod() {
