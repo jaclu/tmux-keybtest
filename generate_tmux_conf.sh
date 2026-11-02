@@ -700,7 +700,9 @@ special_basic_keys() {
     bind_char Right
 
     case "$mod" in
-        M- | M-S- | C-M- | C-M-S-) tmux_vers_ok 2.3 || skip_message="Not handled before 2.3" ;;
+        M- | M-S- | C-M- | C-M-S-)
+            tmux_vers_ok 2.3 || skip_message="Not handled before 2.3"
+            ;;
         *) ;;
     esac
     local no_shift=1
@@ -837,7 +839,9 @@ bind_n_vers_min="1.0"
 . "$d_tkbtst_location"/utils.sh
 
 tmux_vers_ok "$bind_n_vers_min" || {
-    echo "ERROR: bind -n (no-prefix key binding) is not available prior to tmux $bind_n_vers_min"
+    msg="ERROR: bind -n (no-prefix key binding) is not available"
+    msg+=" prior to tmux $bind_n_vers_min"
+    echo "$msg"
     echo "       tmux 0.8 and 0.9 cannot be supported by this tool"
     exit 1
 }
