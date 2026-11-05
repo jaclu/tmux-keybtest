@@ -85,7 +85,6 @@ terminal's capabilities.
     - `C-[` is the same as `Escape`
 - 3.5a - Ironically, since `C-` uppercase is now recognized, but doesn't actually work,
   this also causes the previous `C-S-` workaround to be ignored.
-- Prior to 3.3 - Cannot be bound: `` ` /``
 - Prior to 3.0 - Cannot be bound: `;`
 
 ### Control Shift `C-S-`
@@ -129,8 +128,10 @@ So octal `42` would be written as `\042`
 
 Example:
 
+```tmux
     set -g user-keys[200] "\302\247"
     bind -n User200 send Escape
+```
 
 Be aware that the `send Escape` in this case is only sent to apps running inside tmux.
 It is not picked up by tmux itself. For that `User200` must be used.
